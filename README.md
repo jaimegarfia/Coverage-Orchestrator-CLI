@@ -18,6 +18,7 @@ Cuando publiques el paquete en npm, cualquier usuario podrá ejecutar:
 ```bash
 npx coverage-orchestrator analyze --path <ruta_al_jacoco.xml>
 npx coverage-orchestrator next
+# (Opcional) mark-done existe por compatibilidad, pero el flujo recomendado ya no lo necesita:
 npx coverage-orchestrator mark-done <className>
 ```
 
@@ -86,15 +87,15 @@ Si no lo encuentra automáticamente, especifica la ruta:
 coverage-orchestrator analyze --path "C:\\path\\to\\jacoco.xml"
 ```
 
-Esto genera un fichero local:
+Esto genera un fichero local **en el root del microservicio** (projectRoot detectado por `pom.xml`/`build.gradle`):
 
-- `.coverage-cache.json`
+- `<projectRoot>/.coverage-cache.json`
 
 Opciones:
 
 - `--path <ruta>`: ruta al jacoco.xml (opcional, auto-detecta si no se especifica)
 - `--minCoverageToIgnore <pct>`: ignora clases con cobertura de líneas > pct (default 90)
-- `--ignore <pattern...>`: ignora clases cuyo nombre contenga alguno de esos substrings
+- `--ignore <pattern...>`: ignora clases cuyo nombre contenga alguno de esos substrings (opcional; por defecto no se ignora por nombre)
 - `--include <pattern...>`: fuerza incluir clases aunque coincidan con reglas de ignore
 
 Ejemplo:
@@ -121,7 +122,10 @@ Opciones:
 - `--sourceRoot <path>` (default: `src/main/java`)
 - `--testRoot <path>` (default: `src/test/java`)
 
-### 3) Marcar una clase como completada
+### 3) (Opcional) Marcar una clase como completada
+
+> El workflow recomendado ya no requiere `mark-done`.
+> El CLI marca automáticamente como `DONE` las clases que alcancen el umbral de cobertura al re-ejecutar `analyze`.
 
 ```bash
 coverage-orchestrator mark-done com.foo.BarService
@@ -129,37 +133,71 @@ coverage-orchestrator mark-done com.foo.BarService
 
 ---
 
-## Cómo funciona (alto nivel)
+## Funcionamiento del CLI (end-to-end)
 
-1) **Parseo** del `jacoco.xml`
-2) Por clase, calcula:
+### Objetivo
+Subir la cobertura de un microservicio Java hasta un objetivo (p.ej. **60% global**) generando una cola de trabajo (“misiones”) priorizada por ROI de cobertura.
 
-- `MissedLines` = counter `LINE.missed`
-- `Complexity` = counter `COMPLEXITY.missed + COMPLEXITY.covered`
-- `PriorityScore = MissedLines * Complexity`
+### Flujo recomendado
+1) Ejecuta tests + genera reporte JaCoCo (`jacoco.xml`) en el microservicio.
+2) Ejecuta `coverage-orchestrator analyze` para convertir el XML en un estado local.
+3) Ejecuta `coverage-orchestrator next` para obtener la siguiente misión en Markdown.
+4) Implementa tests, vuelve a generar el reporte JaCoCo y repite.
 
-3) Aplica filtros por defecto:
+### Qué hace `analyze`
+1) Localiza el **projectRoot** del microservicio subiendo carpetas desde el `jacoco.xml` hasta encontrar `pom.xml` o `build.gradle(.kts)`.
+2) Detecta el **entorno** del repo (best-effort): Maven/Gradle, versión Java (si se puede), Spring Boot (si se puede), librería de aserciones (AssertJ/Hamcrest/JUnit) y si usa Lombok.
+3) **Parsea** el `jacoco.xml` y obtiene todas las clases del reporte.
+4) Por clase, calcula métricas y ROI:
+   - `MissedLines` = `LINE.missed`
+   - `Complexity` = `COMPLEXITY.missed + COMPLEXITY.covered`
+   - `PriorityScore = MissedLines * Complexity`
+5) Aplica filtros (solo si el usuario lo pide o por coverage):
+   - Por defecto ignora clases con `coveragePct > 90` (configurable con `--minCoverageToIgnore`).
+   - Por defecto **no** ignora clases por nombre. Si quieres filtrar, usa `--ignore` explícitamente.
+6) Ordena por `PriorityScore` y guarda el estado en:
+   - `<projectRoot>/.coverage-cache.json`
 
-- ignora cobertura de líneas > 90%
-- ignora clases con `DTO`, `Entity` o `Configuration` en el nombre
+### Auto-DONE (Smart Analyze)
+Durante `analyze`, el CLI marca automáticamente una clase como `DONE` si su `coveragePct >= 60` (umbral actual).
+En ese caso añade:
+- `autoVerified: true`
 
-4) Ordena por `PriorityScore` y guarda en `.coverage-cache.json`.
+Esto elimina la necesidad del workflow manual de `mark-done` (se mantiene como compatibilidad).
 
 ---
 
 ## Limitaciones conocidas
 
 - La ruta sugerida del test depende de `sourcefilename` del XML y puede necesitar ajustes.
-- JaCoCo puede listar métodos sintéticos (por ejemplo `lambda$...`) en la lista de 0%.
+- JaCoCo puede listar métodos sintéticos (por ejemplo `lambda$...`) en la lista de 0% (ya filtramos `$`, `<init>`, `<clinit>`, pero puede haber otros casos).
+- Proyectos multi-módulo o versiones definidas por herencia/variables pueden hacer que `env.version` / `env.frameworkVersion` quede como `null` (best-effort).
+
+---
+
+## Workflow recomendado (sin mark-done)
+
+1) Genera/actualiza cobertura en el proyecto:
+   - Maven: `mvn test jacoco:report`
+   - Gradle: `./gradlew test jacocoTestReport`
+2) Ejecuta:
+   ```bash
+   coverage-orchestrator analyze --path <ruta_al_jacoco.xml>
+   ```
+3) Pide la siguiente misión:
+   ```bash
+   coverage-orchestrator next
+   ```
+4) Implementa los tests, vuelve a ejecutar Maven/Gradle, y repite.
 
 ---
 
 ## Roadmap
 
-- Mejorar detección de rutas reales del repo (multi-módulo, prefijos de proyecto)
-- Filtrado de métodos sintéticos (`lambda$`, `access$`, `<init>`, `<clinit>`)
-- Enriquecer el “prompt” con dependencias reales (parseando imports / constructor injection)
-- Modo `--format json` además de Markdown
+- Mejorar resolución de `java.version` y `spring-boot` en proyectos multi-módulo (herencia/propiedades).
+- Detectar JUnit4 vs JUnit5 (prompt adaptativo).
+- Enriquecer el “prompt” con dependencias reales (parseando imports / constructor injection).
+- Añadir `summary` al README (tabla + `--json`).
 
 
 ## Licencia

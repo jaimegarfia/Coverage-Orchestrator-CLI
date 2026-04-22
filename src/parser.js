@@ -172,11 +172,22 @@ export function flattenClasses(parsed) {
  * (If JaCoCo doesn't report LINE counter for a method, it's ignored.)
  */
 export function getZeroCoverageMethods(clazz) {
-  return (clazz?.methods ?? []).filter((m) => {
-    const line = m?.counters?.LINE;
-    if (!line) return false;
-    const total = (line.covered ?? 0) + (line.missed ?? 0);
-    if (total <= 0) return false;
-    return (line.covered ?? 0) === 0 && (line.missed ?? 0) > 0;
-  });
+  return (clazz?.methods ?? [])
+    .filter((m) => {
+      const line = m?.counters?.LINE;
+      if (!line) return false;
+      const total = (line.covered ?? 0) + (line.missed ?? 0);
+      if (total <= 0) return false;
+      return (line.covered ?? 0) === 0 && (line.missed ?? 0) > 0;
+    })
+    .filter((m) => {
+      // Exclude synthetic/compiler-generated methods & constructors:
+      // - Any method containing '$' (e.g., lambda$...)
+      // - <init> (constructor) and <clinit> (static initializer)
+      const name = m?.name ?? "";
+      if (!name) return false;
+      if (name.includes("$")) return false;
+      if (name === "<init>" || name === "<clinit>") return false;
+      return true;
+    });
 }

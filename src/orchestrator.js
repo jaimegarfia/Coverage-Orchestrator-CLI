@@ -5,6 +5,10 @@ import { flattenClasses, getZeroCoverageMethods } from "./parser.js";
 
 const DEFAULT_CACHE_FILE = ".coverage-cache.json";
 
+export function getCachePathForRoot(projectRoot, cacheFile = DEFAULT_CACHE_FILE) {
+  return path.resolve(projectRoot, cacheFile);
+}
+
 /**
  * Intenta auto-detectar jacoco.xml en rutas comunes (Maven/Gradle)
  * @returns {Promise<string|null>} ruta al jacoco.xml o null si no se encuentra
@@ -28,31 +32,33 @@ export function getCachePath(cacheFile = DEFAULT_CACHE_FILE) {
   return path.resolve(process.cwd(), cacheFile);
 }
 
-export async function loadCache(cacheFile = DEFAULT_CACHE_FILE) {
-  const p = getCachePath(cacheFile);
+export async function loadCache(cacheFile = DEFAULT_CACHE_FILE, { projectRoot = process.cwd() } = {}) {
+  const p = getCachePathForRoot(projectRoot, cacheFile);
   const exists = await fs.pathExists(p);
   if (!exists) {
     return {
       version: 1,
       generatedAt: null,
       xmlPath: null,
+      env: null,
       items: [],
     };
   }
   return fs.readJson(p);
 }
 
-export async function saveCache(cache, cacheFile = DEFAULT_CACHE_FILE) {
-  const p = getCachePath(cacheFile);
+export async function saveCache(cache, cacheFile = DEFAULT_CACHE_FILE, { projectRoot = process.cwd() } = {}) {
+  const p = getCachePathForRoot(projectRoot, cacheFile);
   await fs.writeJson(p, cache, { spaces: 2 });
   return p;
 }
 
+/**
+ * Legacy hook kept for backward compatibility with the CLI option `--ignore`.
+ * By default we no longer ignore classes by name (DTO/Entity/Configuration/etc.).
+ */
 export function shouldIgnoreClassByName(className, ignorePatterns) {
-  const patterns = ignorePatterns?.length
-    ? ignorePatterns
-    : ["DTO", "Entity", "Configuration"];
-
+  const patterns = ignorePatterns?.length ? ignorePatterns : [];
   return patterns.some((p) => className.includes(p));
 }
 
@@ -66,7 +72,15 @@ export function computePriorityScore({ missedLines, complexity }) {
  * - Ignore classes with line coverage > 90%
  * - Ignore classes that contain DTO/Entity/Configuration by default
  */
-export function buildCacheItems(parsed, { includePatterns = [], ignorePatterns = null, minCoverageToIgnorePct = 90 } = {}) {
+export function buildCacheItems(
+  parsed,
+  {
+    includePatterns = [],
+    ignorePatterns = null,
+    minCoverageToIgnorePct = 90,
+    autoDoneThresholdPct = null,
+  } = {},
+) {
   const classes = flattenClasses(parsed);
 
   const items = [];
@@ -88,6 +102,7 @@ export function buildCacheItems(parsed, { includePatterns = [], ignorePatterns =
 
     if (!forcedInclude) {
       if (coveragePct > minCoverageToIgnorePct) continue;
+      // No default ignore-by-name anymore; only apply if user passed --ignore patterns explicitly
       if (shouldIgnoreClassByName(className, ignorePatterns)) continue;
     }
 
@@ -102,6 +117,13 @@ export function buildCacheItems(parsed, { includePatterns = [], ignorePatterns =
       desc: m.desc,
       line: m.line,
     }));
+
+    const threshold =
+      typeof autoDoneThresholdPct === "number" && Number.isFinite(autoDoneThresholdPct)
+        ? autoDoneThresholdPct
+        : null;
+
+    const isAutoDone = threshold !== null && coveragePct >= threshold;
 
     items.push({
       className,
@@ -122,7 +144,8 @@ export function buildCacheItems(parsed, { includePatterns = [], ignorePatterns =
         zeroCoverage: zeroMethods,
       },
 
-      status: "TODO",
+      status: isAutoDone ? "DONE" : "TODO",
+      autoVerified: isAutoDone ? true : false,
       updatedAt: new Date().toISOString(),
     });
   }
@@ -152,18 +175,27 @@ export function markDone(cache, className) {
  * Note: Java file paths are best-effort because jacoco.xml only contains package + sourcefilename.
  * We output conventional Maven/Gradle paths; user/agent can adjust based on repository layout.
  */
-export function renderMissionMarkdown(item, { sourceRoot = "src/main/java", testRoot = "src/test/java" } = {}) {
+export function renderMissionMarkdown(
+  item,
+  {
+    sourceRoot = "src/main/java",
+    testRoot = "src/test/java",
+    env = null,
+  } = {},
+) {
   const pkgPath = (item.packageName ?? "").replaceAll(".", "/");
   const javaFile = item.sourceFilename
     ? path.posix.join(sourceRoot, pkgPath, item.sourceFilename)
     : "(unknown - missing sourcefilename in jacoco.xml)";
 
   const testFile = item.sourceFilename
-    ? path.posix.join(
-        testRoot,
-        pkgPath,
-        item.sourceFilename.replace(/\\.java$/i, "Test.java"),
-      )
+    ? (() => {
+        // Deterministic test naming: <ClassName>Test.java (no replace)
+        // Use posix parsing to keep '/' separators in output paths
+        const parsed = path.posix.parse(item.sourceFilename);
+        const testBasename = `${parsed.name}Test${parsed.ext || ".java"}`;
+        return path.posix.join(testRoot, pkgPath, testBasename);
+      })()
     : "(unknown - missing sourcefilename in jacoco.xml)";
 
   const methods0 = item.methods?.zeroCoverage ?? [];
@@ -172,9 +204,20 @@ export function renderMissionMarkdown(item, { sourceRoot = "src/main/java", test
       ? methods0.map((m) => `- \`${m.name}\`${m.line ? ` (line ${m.line})` : ""}`).join("\n")
       : "_No se detectaron métodos con 0% LINE coverage (JaCoCo puede agregar counters agregados)._";
 
+  const javaVersionLabel = env?.version ?? "desconocida";
+  const frameworkLabel = env?.framework
+    ? `${env.framework}${env.frameworkVersion ? ` ${env.frameworkVersion}` : ""}`
+    : "desconocido";
+  const assertionLib = env?.assertionLib ?? "JUnit 5 Assertions";
+
   const prompt = [
     `Genera tests unitarios JUnit 5 para la clase \`${item.className}\``,
     `con foco en aumentar la cobertura de líneas y ramas.`,
+    ``,
+    `Contexto:`,
+    `- Entorno: Java ${javaVersionLabel}${env?.buildTool ? ` (${env.buildTool})` : ""}. Framework: ${frameworkLabel}.`,
+    `- No uses sintaxis de versiones superiores a Java ${javaVersionLabel}.`,
+    `- Usa JUnit 5 y ${assertionLib} para las verificaciones.`,
     ``,
     `Requisitos:`,
     `- Usa Mockito para simular dependencias (repositorios, clients HTTP, etc.).`,

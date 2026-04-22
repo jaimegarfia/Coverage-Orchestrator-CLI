@@ -1,7 +1,20 @@
 {
   "version": 1,
-  "generatedAt": "2026-04-22T09:15:38.682Z",
+  "generatedAt": "2026-04-22T10:00:57.972Z",
   "xmlPath": "C:\\Users\\jgarfiaa\\Proyectos\\mall\\mall-portal\\target\\site\\jacoco\\jacoco.xml",
+  "env": {
+    "language": "Java",
+    "version": null,
+    "framework": null,
+    "frameworkVersion": null,
+    "buildTool": "Maven",
+    "assertionLib": "JUnit 5 Assertions",
+    "detection": {
+      "projectRoot": "C:\\Users\\jgarfiaa\\Proyectos\\mall\\mall-portal",
+      "fromPom": true,
+      "fromGradle": false
+    }
+  },
   "items": [
     {
       "className": "com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl",
@@ -9,79 +22,14 @@
       "sourceFilename": "OmsPortalOrderServiceImpl.java",
       "internalName": "com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl",
       "metrics": {
-        "missedLines": 354,
-        "coveredLines": 76,
-        "coveragePct": 17.674418604651162,
+        "missedLines": 85,
+        "coveredLines": 345,
+        "coveragePct": 80.23255813953489,
         "complexityTotal": 119
       },
-      "priorityScore": 42126,
+      "priorityScore": 10115,
       "methods": {
         "zeroCoverage": [
-          {
-            "name": "generateConfirmOrder",
-            "desc": "(Ljava/util/List;)Lcom/macro/mall/portal/domain/ConfirmOrderResult;",
-            "line": 73
-          },
-          {
-            "name": "generateOrder",
-            "desc": "(Lcom/macro/mall/portal/domain/OrderParam;)Ljava/util/Map;",
-            "line": 97
-          },
-          {
-            "name": "list",
-            "desc": "(Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;)Lcom/macro/mall/common/api/CommonPage;",
-            "line": 377
-          },
-          {
-            "name": "detail",
-            "desc": "(Ljava/lang/Long;)Lcom/macro/mall/portal/domain/OmsOrderDetail;",
-            "line": 420
-          },
-          {
-            "name": "deleteOrder",
-            "desc": "(Ljava/lang/Long;)V",
-            "line": 432
-          },
-          {
-            "name": "paySuccessByOrderSn",
-            "desc": "(Ljava/lang/String;Ljava/lang/Integer;)V",
-            "line": 447
-          },
-          {
-            "name": "generateOrderSn",
-            "desc": "(Lcom/macro/mall/model/OmsOrder;)Ljava/lang/String;",
-            "line": 463
-          },
-          {
-            "name": "deleteCartItemList",
-            "desc": "(Ljava/util/List;Lcom/macro/mall/model/UmsMember;)V",
-            "line": 483
-          },
-          {
-            "name": "calcGiftGrowth",
-            "desc": "(Ljava/util/List;)Ljava/lang/Integer;",
-            "line": 494
-          },
-          {
-            "name": "calcGifIntegration",
-            "desc": "(Ljava/util/List;)Ljava/lang/Integer;",
-            "line": 505
-          },
-          {
-            "name": "handleRealAmount",
-            "desc": "(Ljava/util/List;)V",
-            "line": 535
-          },
-          {
-            "name": "getOrderPromotionInfo",
-            "desc": "(Ljava/util/List;)Ljava/lang/String;",
-            "line": 549
-          },
-          {
-            "name": "calcPayAmount",
-            "desc": "(Lcom/macro/mall/model/OmsOrder;)Ljava/math/BigDecimal;",
-            "line": 566
-          },
           {
             "name": "calcIntegrationAmount",
             "desc": "(Ljava/util/List;)Ljava/math/BigDecimal;",
@@ -91,11 +39,6 @@
             "name": "calcCouponAmount",
             "desc": "(Ljava/util/List;)Ljava/math/BigDecimal;",
             "line": 591
-          },
-          {
-            "name": "calcPromotionAmount",
-            "desc": "(Ljava/util/List;)Ljava/math/BigDecimal;",
-            "line": 604
           },
           {
             "name": "getUseIntegrationAmount",
@@ -111,159 +54,11 @@
             "name": "calcPerCouponAmount",
             "desc": "(Ljava/util/List;Lcom/macro/mall/model/SmsCoupon;)V",
             "line": 675
-          },
-          {
-            "name": "getCouponOrderItemByRelation",
-            "desc": "(Lcom/macro/mall/portal/domain/SmsCouponHistoryDetail;Ljava/util/List;I)Ljava/util/List;",
-            "line": 691
-          },
-          {
-            "name": "getUseCoupon",
-            "desc": "(Ljava/util/List;Ljava/lang/Long;)Lcom/macro/mall/portal/domain/SmsCouponHistoryDetail;",
-            "line": 727
-          },
-          {
-            "name": "calcTotalAmount",
-            "desc": "(Ljava/util/List;)Ljava/math/BigDecimal;",
-            "line": 740
-          },
-          {
-            "name": "lockStock",
-            "desc": "(Ljava/util/List;)V",
-            "line": 751
-          },
-          {
-            "name": "hasStock",
-            "desc": "(Ljava/util/List;)Z",
-            "line": 765
-          },
-          {
-            "name": "calcCartAmount",
-            "desc": "(Ljava/util/List;)Lcom/macro/mall/portal/domain/ConfirmOrderResult$CalcAmount;",
-            "line": 780
-          },
-          {
-            "name": "lambda$list$0",
-            "desc": "(Lcom/macro/mall/portal/domain/OmsOrderDetail;Lcom/macro/mall/model/OmsOrderItem;)Z",
-            "line": 410
           }
         ]
       },
       "status": "DONE",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
-    },
-    {
-      "className": "com.macro.mall.portal.service.impl.PmsPortalProductServiceImpl",
-      "packageName": "com/macro/mall/portal/service/impl",
-      "sourceFilename": "PmsPortalProductServiceImpl.java",
-      "internalName": "com/macro/mall/portal/service/impl/PmsPortalProductServiceImpl",
-      "metrics": {
-        "missedLines": 67,
-        "coveredLines": 0,
-        "coveragePct": 0,
-        "complexityTotal": 19
-      },
-      "priorityScore": 1273,
-      "methods": {
-        "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 24
-          },
-          {
-            "name": "search",
-            "desc": "(Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;)Ljava/util/List;",
-            "line": 46
-          },
-          {
-            "name": "categoryTreeList",
-            "desc": "()Ljava/util/List;",
-            "line": 75
-          },
-          {
-            "name": "detail",
-            "desc": "(Ljava/lang/Long;)Lcom/macro/mall/portal/domain/PmsPortalProductDetail;",
-            "line": 86
-          },
-          {
-            "name": "covert",
-            "desc": "(Lcom/macro/mall/model/PmsProductCategory;Ljava/util/List;)Lcom/macro/mall/portal/domain/PmsProductCategoryNode;",
-            "line": 136
-          },
-          {
-            "name": "lambda$covert$3",
-            "desc": "(Ljava/util/List;Lcom/macro/mall/model/PmsProductCategory;)Lcom/macro/mall/portal/domain/PmsProductCategoryNode;",
-            "line": 140
-          },
-          {
-            "name": "lambda$covert$2",
-            "desc": "(Lcom/macro/mall/model/PmsProductCategory;Lcom/macro/mall/model/PmsProductCategory;)Z",
-            "line": 139
-          },
-          {
-            "name": "lambda$categoryTreeList$1",
-            "desc": "(Ljava/util/List;Lcom/macro/mall/model/PmsProductCategory;)Lcom/macro/mall/portal/domain/PmsProductCategoryNode;",
-            "line": 79
-          },
-          {
-            "name": "lambda$categoryTreeList$0",
-            "desc": "(Lcom/macro/mall/model/PmsProductCategory;)Z",
-            "line": 78
-          }
-        ]
-      },
-      "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
-    },
-    {
-      "className": "com.macro.mall.portal.service.impl.AlipayServiceImpl",
-      "packageName": "com/macro/mall/portal/service/impl",
-      "sourceFilename": "AlipayServiceImpl.java",
-      "internalName": "com/macro/mall/portal/service/impl/AlipayServiceImpl",
-      "metrics": {
-        "missedLines": 75,
-        "coveredLines": 0,
-        "coveragePct": 0,
-        "complexityTotal": 16
-      },
-      "priorityScore": 1200,
-      "methods": {
-        "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 31
-          },
-          {
-            "name": "pay",
-            "desc": "(Lcom/macro/mall/portal/domain/AliPayParam;)Ljava/lang/String;",
-            "line": 42
-          },
-          {
-            "name": "notify",
-            "desc": "(Ljava/util/Map;)Ljava/lang/String;",
-            "line": 73
-          },
-          {
-            "name": "query",
-            "desc": "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;",
-            "line": 100
-          },
-          {
-            "name": "webPay",
-            "desc": "(Lcom/macro/mall/portal/domain/AliPayParam;)Ljava/lang/String;",
-            "line": 134
-          },
-          {
-            "name": "<clinit>",
-            "desc": "()V",
-            "line": 29
-          }
-        ]
-      },
-      "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.domain.OmsOrderReturnApplyParam",
@@ -279,11 +74,6 @@
       "priorityScore": 594,
       "methods": {
         "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 15
-          },
           {
             "name": "getOrderId",
             "desc": "()Ljava/lang/Long;",
@@ -447,7 +237,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.service.impl.UmsMemberServiceImpl",
@@ -481,7 +271,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.controller.OmsCartItemController",
@@ -497,11 +287,6 @@
       "priorityScore": 378,
       "methods": {
         "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 26
-          },
           {
             "name": "add",
             "desc": "(Lcom/macro/mall/model/OmsCartItem;)Lcom/macro/mall/common/api/CommonResult;",
@@ -545,7 +330,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.service.impl.UmsMemberReceiveAddressServiceImpl",
@@ -561,11 +346,6 @@
       "priorityScore": 306,
       "methods": {
         "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 20
-          },
           {
             "name": "add",
             "desc": "(Lcom/macro/mall/model/UmsMemberReceiveAddress;)I",
@@ -594,7 +374,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.controller.UmsMemberController",
@@ -610,11 +390,6 @@
       "priorityScore": 260,
       "methods": {
         "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 30
-          },
           {
             "name": "register",
             "desc": "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/macro/mall/common/api/CommonResult;",
@@ -648,7 +423,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.controller.OmsPortalOrderController",
@@ -664,11 +439,6 @@
       "priorityScore": 231,
       "methods": {
         "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 28
-          },
           {
             "name": "generateConfirmOrder",
             "desc": "(Ljava/util/List;)Lcom/macro/mall/common/api/CommonResult;",
@@ -722,7 +492,25 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
+    },
+    {
+      "className": "com.macro.mall.portal.service.impl.AlipayServiceImpl",
+      "packageName": "com/macro/mall/portal/service/impl",
+      "sourceFilename": "AlipayServiceImpl.java",
+      "internalName": "com/macro/mall/portal/service/impl/AlipayServiceImpl",
+      "metrics": {
+        "missedLines": 14,
+        "coveredLines": 61,
+        "coveragePct": 81.33333333333333,
+        "complexityTotal": 16
+      },
+      "priorityScore": 224,
+      "methods": {
+        "zeroCoverage": []
+      },
+      "status": "TODO",
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.config.AlipayConfig",
@@ -738,11 +526,6 @@
       "priorityScore": 209,
       "methods": {
         "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 18
-          },
           {
             "name": "getGatewayUrl",
             "desc": "()Ljava/lang/String;",
@@ -836,111 +619,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
-    },
-    {
-      "className": "com.macro.mall.portal.domain.PmsPortalProductDetail",
-      "packageName": "com/macro/mall/portal/domain",
-      "sourceFilename": "PmsPortalProductDetail.java",
-      "internalName": "com/macro/mall/portal/domain/PmsPortalProductDetail",
-      "metrics": {
-        "missedLines": 10,
-        "coveredLines": 0,
-        "coveragePct": 0,
-        "complexityTotal": 17
-      },
-      "priorityScore": 170,
-      "methods": {
-        "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 16
-          },
-          {
-            "name": "getProduct",
-            "desc": "()Lcom/macro/mall/model/PmsProduct;",
-            "line": 18
-          },
-          {
-            "name": "getBrand",
-            "desc": "()Lcom/macro/mall/model/PmsBrand;",
-            "line": 20
-          },
-          {
-            "name": "getProductAttributeList",
-            "desc": "()Ljava/util/List;",
-            "line": 22
-          },
-          {
-            "name": "getProductAttributeValueList",
-            "desc": "()Ljava/util/List;",
-            "line": 24
-          },
-          {
-            "name": "getSkuStockList",
-            "desc": "()Ljava/util/List;",
-            "line": 26
-          },
-          {
-            "name": "getProductLadderList",
-            "desc": "()Ljava/util/List;",
-            "line": 28
-          },
-          {
-            "name": "getProductFullReductionList",
-            "desc": "()Ljava/util/List;",
-            "line": 30
-          },
-          {
-            "name": "getCouponList",
-            "desc": "()Ljava/util/List;",
-            "line": 32
-          },
-          {
-            "name": "setProduct",
-            "desc": "(Lcom/macro/mall/model/PmsProduct;)V",
-            "line": 15
-          },
-          {
-            "name": "setBrand",
-            "desc": "(Lcom/macro/mall/model/PmsBrand;)V",
-            "line": 15
-          },
-          {
-            "name": "setProductAttributeList",
-            "desc": "(Ljava/util/List;)V",
-            "line": 15
-          },
-          {
-            "name": "setProductAttributeValueList",
-            "desc": "(Ljava/util/List;)V",
-            "line": 15
-          },
-          {
-            "name": "setSkuStockList",
-            "desc": "(Ljava/util/List;)V",
-            "line": 15
-          },
-          {
-            "name": "setProductLadderList",
-            "desc": "(Ljava/util/List;)V",
-            "line": 15
-          },
-          {
-            "name": "setProductFullReductionList",
-            "desc": "(Ljava/util/List;)V",
-            "line": 15
-          },
-          {
-            "name": "setCouponList",
-            "desc": "(Ljava/util/List;)V",
-            "line": 15
-          }
-        ]
-      },
-      "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.config.RabbitMqConfig",
@@ -956,11 +635,6 @@
       "priorityScore": 161,
       "methods": {
         "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 13
-          },
           {
             "name": "orderDirect",
             "desc": "()Lorg/springframework/amqp/core/DirectExchange;",
@@ -994,7 +668,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.controller.UmsMemberReceiveAddressController",
@@ -1010,11 +684,6 @@
       "priorityScore": 153,
       "methods": {
         "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 23
-          },
           {
             "name": "add",
             "desc": "(Lcom/macro/mall/model/UmsMemberReceiveAddress;)Lcom/macro/mall/common/api/CommonResult;",
@@ -1043,7 +712,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.service.impl.OmsCartItemServiceImpl",
@@ -1067,7 +736,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.controller.MemberAttentionController",
@@ -1083,11 +752,6 @@
       "priorityScore": 120,
       "methods": {
         "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 23
-          },
           {
             "name": "add",
             "desc": "(Lcom/macro/mall/portal/domain/MemberBrandAttention;)Lcom/macro/mall/common/api/CommonResult;",
@@ -1116,7 +780,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.controller.MemberProductCollectionController",
@@ -1132,11 +796,6 @@
       "priorityScore": 120,
       "methods": {
         "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 23
-          },
           {
             "name": "add",
             "desc": "(Lcom/macro/mall/portal/domain/MemberProductCollection;)Lcom/macro/mall/common/api/CommonResult;",
@@ -1165,7 +824,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.controller.AlipayController",
@@ -1181,11 +840,6 @@
       "priorityScore": 108,
       "methods": {
         "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 32
-          },
           {
             "name": "pay",
             "desc": "(Lcom/macro/mall/portal/domain/AliPayParam;Ljavax/servlet/http/HttpServletResponse;)V",
@@ -1209,91 +863,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.679Z"
-    },
-    {
-      "className": "com.macro.mall.portal.domain.ConfirmOrderResult",
-      "packageName": "com/macro/mall/portal/domain",
-      "sourceFilename": "ConfirmOrderResult.java",
-      "internalName": "com/macro/mall/portal/domain/ConfirmOrderResult",
-      "metrics": {
-        "missedLines": 8,
-        "coveredLines": 0,
-        "coveragePct": 0,
-        "complexityTotal": 13
-      },
-      "priorityScore": 104,
-      "methods": {
-        "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 18
-          },
-          {
-            "name": "getCartPromotionItemList",
-            "desc": "()Ljava/util/List;",
-            "line": 20
-          },
-          {
-            "name": "getMemberReceiveAddressList",
-            "desc": "()Ljava/util/List;",
-            "line": 22
-          },
-          {
-            "name": "getCouponHistoryDetailList",
-            "desc": "()Ljava/util/List;",
-            "line": 24
-          },
-          {
-            "name": "getIntegrationConsumeSetting",
-            "desc": "()Lcom/macro/mall/model/UmsIntegrationConsumeSetting;",
-            "line": 26
-          },
-          {
-            "name": "getMemberIntegration",
-            "desc": "()Ljava/lang/Integer;",
-            "line": 28
-          },
-          {
-            "name": "getCalcAmount",
-            "desc": "()Lcom/macro/mall/portal/domain/ConfirmOrderResult$CalcAmount;",
-            "line": 30
-          },
-          {
-            "name": "setCartPromotionItemList",
-            "desc": "(Ljava/util/List;)V",
-            "line": 17
-          },
-          {
-            "name": "setMemberReceiveAddressList",
-            "desc": "(Ljava/util/List;)V",
-            "line": 17
-          },
-          {
-            "name": "setCouponHistoryDetailList",
-            "desc": "(Ljava/util/List;)V",
-            "line": 17
-          },
-          {
-            "name": "setIntegrationConsumeSetting",
-            "desc": "(Lcom/macro/mall/model/UmsIntegrationConsumeSetting;)V",
-            "line": 17
-          },
-          {
-            "name": "setMemberIntegration",
-            "desc": "(Ljava/lang/Integer;)V",
-            "line": 17
-          },
-          {
-            "name": "setCalcAmount",
-            "desc": "(Lcom/macro/mall/portal/domain/ConfirmOrderResult$CalcAmount;)V",
-            "line": 17
-          }
-        ]
-      },
-      "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.957Z"
     },
     {
       "className": "com.macro.mall.portal.controller.HomeController",
@@ -1309,11 +879,6 @@
       "priorityScore": 91,
       "methods": {
         "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 26
-          },
           {
             "name": "content",
             "desc": "()Lcom/macro/mall/common/api/CommonResult;",
@@ -1347,7 +912,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.controller.MemberReadHistoryController",
@@ -1363,11 +928,6 @@
       "priorityScore": 91,
       "methods": {
         "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 25
-          },
           {
             "name": "create",
             "desc": "(Lcom/macro/mall/portal/domain/MemberReadHistory;)Lcom/macro/mall/common/api/CommonResult;",
@@ -1391,7 +951,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.controller.UmsMemberCouponController",
@@ -1407,11 +967,6 @@
       "priorityScore": 72,
       "methods": {
         "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 29
-          },
           {
             "name": "add",
             "desc": "(Ljava/lang/Long;)Lcom/macro/mall/common/api/CommonResult;",
@@ -1440,71 +995,46 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
-      "className": "com.macro.mall.portal.domain.ConfirmOrderResult$CalcAmount",
+      "className": "com.macro.mall.portal.domain.ConfirmOrderResult",
       "packageName": "com/macro/mall/portal/domain",
       "sourceFilename": "ConfirmOrderResult.java",
-      "internalName": "com/macro/mall/portal/domain/ConfirmOrderResult$CalcAmount",
+      "internalName": "com/macro/mall/portal/domain/ConfirmOrderResult",
       "metrics": {
-        "missedLines": 6,
-        "coveredLines": 0,
-        "coveragePct": 0,
-        "complexityTotal": 9
+        "missedLines": 4,
+        "coveredLines": 4,
+        "coveragePct": 50,
+        "complexityTotal": 13
       },
-      "priorityScore": 54,
+      "priorityScore": 52,
       "methods": {
         "zeroCoverage": [
           {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 34
+            "name": "getCartPromotionItemList",
+            "desc": "()Ljava/util/List;",
+            "line": 20
           },
           {
-            "name": "getTotalAmount",
-            "desc": "()Ljava/math/BigDecimal;",
-            "line": 36
+            "name": "getMemberReceiveAddressList",
+            "desc": "()Ljava/util/List;",
+            "line": 22
           },
           {
-            "name": "getFreightAmount",
-            "desc": "()Ljava/math/BigDecimal;",
-            "line": 38
+            "name": "getCouponHistoryDetailList",
+            "desc": "()Ljava/util/List;",
+            "line": 24
           },
           {
-            "name": "getPromotionAmount",
-            "desc": "()Ljava/math/BigDecimal;",
-            "line": 40
-          },
-          {
-            "name": "getPayAmount",
-            "desc": "()Ljava/math/BigDecimal;",
-            "line": 42
-          },
-          {
-            "name": "setTotalAmount",
-            "desc": "(Ljava/math/BigDecimal;)V",
-            "line": 33
-          },
-          {
-            "name": "setFreightAmount",
-            "desc": "(Ljava/math/BigDecimal;)V",
-            "line": 33
-          },
-          {
-            "name": "setPromotionAmount",
-            "desc": "(Ljava/math/BigDecimal;)V",
-            "line": 33
-          },
-          {
-            "name": "setPayAmount",
-            "desc": "(Ljava/math/BigDecimal;)V",
-            "line": 33
+            "name": "getIntegrationConsumeSetting",
+            "desc": "()Lcom/macro/mall/model/UmsIntegrationConsumeSetting;",
+            "line": 26
           }
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.service.impl.PmsPortalBrandServiceImpl",
@@ -1520,11 +1050,6 @@
       "priorityScore": 44,
       "methods": {
         "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 22
-          },
           {
             "name": "recommendList",
             "desc": "(Ljava/lang/Integer;Ljava/lang/Integer;)Ljava/util/List;",
@@ -1543,7 +1068,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.domain.MemberProductCollection",
@@ -1582,7 +1107,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.config.SwaggerConfig",
@@ -1599,11 +1124,6 @@
       "methods": {
         "zeroCoverage": [
           {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 16
-          },
-          {
             "name": "swaggerProperties",
             "desc": "()Lcom/macro/mall/common/domain/SwaggerProperties;",
             "line": 20
@@ -1616,7 +1136,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.controller.PmsPortalProductController",
@@ -1632,11 +1152,6 @@
       "priorityScore": 28,
       "methods": {
         "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 27
-          },
           {
             "name": "search",
             "desc": "(Ljava/lang/String;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;)Lcom/macro/mall/common/api/CommonResult;",
@@ -1655,7 +1170,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.controller.PmsPortalBrandController",
@@ -1671,11 +1186,6 @@
       "priorityScore": 28,
       "methods": {
         "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 25
-          },
           {
             "name": "recommendList",
             "desc": "(Ljava/lang/Integer;Ljava/lang/Integer;)Lcom/macro/mall/common/api/CommonResult;",
@@ -1694,7 +1204,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.domain.FlashPromotionProduct",
@@ -1743,7 +1253,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.config.GlobalCorsConfig",
@@ -1760,11 +1270,6 @@
       "methods": {
         "zeroCoverage": [
           {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 14
-          },
-          {
             "name": "corsFilter",
             "desc": "()Lorg/springframework/web/filter/CorsFilter;",
             "line": 21
@@ -1772,7 +1277,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.controller.OmsPortalOrderReturnApplyController",
@@ -1789,11 +1294,6 @@
       "methods": {
         "zeroCoverage": [
           {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 24
-          },
-          {
             "name": "create",
             "desc": "(Lcom/macro/mall/portal/domain/OmsOrderReturnApplyParam;)Lcom/macro/mall/common/api/CommonResult;",
             "line": 32
@@ -1801,7 +1301,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.domain.CartProduct",
@@ -1840,7 +1340,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.component.CancelOrderReceiver",
@@ -1857,24 +1357,14 @@
       "methods": {
         "zeroCoverage": [
           {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 17
-          },
-          {
             "name": "handle",
             "desc": "(Ljava/lang/Long;)V",
             "line": 23
-          },
-          {
-            "name": "<clinit>",
-            "desc": "()V",
-            "line": 18
           }
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.service.impl.OmsPortalOrderReturnApplyServiceImpl",
@@ -1891,11 +1381,6 @@
       "methods": {
         "zeroCoverage": [
           {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 18
-          },
-          {
             "name": "create",
             "desc": "(Lcom/macro/mall/portal/domain/OmsOrderReturnApplyParam;)I",
             "line": 23
@@ -1903,7 +1388,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.component.CancelOrderSender",
@@ -1920,11 +1405,6 @@
       "methods": {
         "zeroCoverage": [
           {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 18
-          },
-          {
             "name": "sendMessage",
             "desc": "(Ljava/lang/Long;J)V",
             "line": 25
@@ -1932,7 +1412,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.component.OrderTimeOutCancelTask",
@@ -1949,11 +1429,6 @@
       "methods": {
         "zeroCoverage": [
           {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 15
-          },
-          {
             "name": "cancelTimeOutOrder",
             "desc": "()V",
             "line": 26
@@ -1961,41 +1436,31 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
-      "className": "com.macro.mall.portal.domain.PmsProductCategoryNode",
+      "className": "com.macro.mall.portal.domain.ConfirmOrderResult$CalcAmount",
       "packageName": "com/macro/mall/portal/domain",
-      "sourceFilename": "PmsProductCategoryNode.java",
-      "internalName": "com/macro/mall/portal/domain/PmsProductCategoryNode",
+      "sourceFilename": "ConfirmOrderResult.java",
+      "internalName": "com/macro/mall/portal/domain/ConfirmOrderResult$CalcAmount",
       "metrics": {
-        "missedLines": 3,
-        "coveredLines": 0,
-        "coveragePct": 0,
-        "complexityTotal": 3
+        "missedLines": 1,
+        "coveredLines": 5,
+        "coveragePct": 83.33333333333334,
+        "complexityTotal": 9
       },
       "priorityScore": 9,
       "methods": {
         "zeroCoverage": [
           {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 16
-          },
-          {
-            "name": "getChildren",
-            "desc": "()Ljava/util/List;",
-            "line": 18
-          },
-          {
-            "name": "setChildren",
-            "desc": "(Ljava/util/List;)V",
-            "line": 15
+            "name": "getFreightAmount",
+            "desc": "()Ljava/math/BigDecimal;",
+            "line": 38
           }
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.config.JacksonConfig",
@@ -2012,11 +1477,6 @@
       "methods": {
         "zeroCoverage": [
           {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 18
-          },
-          {
             "name": "jacksonObjectMapper",
             "desc": "(Lorg/springframework/http/converter/json/Jackson2ObjectMapperBuilder;)Lcom/fasterxml/jackson/databind/ObjectMapper;",
             "line": 23
@@ -2024,7 +1484,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.MallPortalApplication",
@@ -2041,11 +1501,6 @@
       "methods": {
         "zeroCoverage": [
           {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 7
-          },
-          {
             "name": "main",
             "desc": "([Ljava/lang/String;)V",
             "line": 10
@@ -2053,7 +1508,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.component.CancelOrderSender$1",
@@ -2070,11 +1525,6 @@
       "methods": {
         "zeroCoverage": [
           {
-            "name": "<init>",
-            "desc": "(Lcom/macro/mall/portal/component/CancelOrderSender;J)V",
-            "line": 25
-          },
-          {
             "name": "postProcessMessage",
             "desc": "(Lorg/springframework/amqp/core/Message;)Lorg/springframework/amqp/core/Message;",
             "line": 29
@@ -2082,7 +1532,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.config.MallSecurityConfig",
@@ -2099,24 +1549,14 @@
       "methods": {
         "zeroCoverage": [
           {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 14
-          },
-          {
             "name": "userDetailsService",
             "desc": "()Lorg/springframework/security/core/userdetails/UserDetailsService;",
-            "line": 22
-          },
-          {
-            "name": "lambda$userDetailsService$0",
-            "desc": "(Ljava/lang/String;)Lorg/springframework/security/core/userdetails/UserDetails;",
             "line": 22
           }
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.config.AlipayClientConfig",
@@ -2133,11 +1573,6 @@
       "methods": {
         "zeroCoverage": [
           {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 15
-          },
-          {
             "name": "alipayClient",
             "desc": "(Lcom/macro/mall/portal/config/AlipayConfig;)Lcom/alipay/api/AlipayClient;",
             "line": 19
@@ -2145,7 +1580,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.service.impl.OmsPromotionServiceImpl$2",
@@ -2169,7 +1604,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.service.impl.OmsPromotionServiceImpl$1",
@@ -2193,7 +1628,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.config.SpringTaskConfig",
@@ -2208,16 +1643,10 @@
       },
       "priorityScore": 1,
       "methods": {
-        "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 12
-          }
-        ]
+        "zeroCoverage": []
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     },
     {
       "className": "com.macro.mall.portal.config.MyBatisConfig",
@@ -2232,16 +1661,10 @@
       },
       "priorityScore": 1,
       "methods": {
-        "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 14
-          }
-        ]
+        "zeroCoverage": []
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T09:15:38.682Z"
+      "updatedAt": "2026-04-22T10:00:57.972Z"
     }
   ]
 }

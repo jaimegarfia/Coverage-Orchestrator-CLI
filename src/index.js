@@ -3,6 +3,7 @@ import { Command } from "commander";
 import chalk from "chalk";
 import Table from "cli-table3";
 import { parseJacocoXml } from "./parser.js";
+import { detectEnvironment, findProjectRoot } from "./detector.js";
 import {
   buildCacheItems,
   loadCache,
@@ -30,10 +31,7 @@ program
     "--include <pattern...>",
     "Incluye clases aunque coincidan con ignore rules (substrings)",
   )
-  .option(
-    "--ignore <pattern...>",
-    "Ignora clases por nombre (substrings). Default: DTO Entity Configuration",
-  )
+  .option("--ignore <pattern...>", "Ignora clases por nombre (substrings).")
   .option(
     "--minCoverageToIgnore <pct>",
     "Ignora clases con cobertura de líneas > pct (default: 90)",
@@ -70,8 +68,14 @@ program
     const includePatterns = opts.include ?? [];
     const ignorePatterns = opts.ignore ?? null;
 
-    // 1) Cargar cache previo (si existe) para preservar estados DONE
-    const oldCache = await loadCache();
+    // 0) Detectar projectRoot basándonos en la ubicación del jacoco.xml (best-effort)
+    const projectRoot = await findProjectRoot(xmlPath);
+
+    // 1) Detectar entorno del proyecto real
+    const env = await detectEnvironment({ projectRoot });
+
+    // 2) Cargar cache previo del microservicio (si existe)
+    const oldCache = await loadCache(undefined, { projectRoot });
     const oldItemsByClass = new Map(
       (oldCache.items ?? []).map((it) => [it.className, it]),
     );
@@ -80,12 +84,16 @@ program
     const parsed = await parseJacocoXml(xmlPath);
 
     // 2) Construir nuevos items (status TODO por defecto)
+    // Auto-DONE threshold: si una clase llega a >= 60% coverage, se considera terminada
+    const COVERAGE_THRESHOLD = 60;
+
     const newItemsRaw = buildCacheItems(parsed, {
       includePatterns,
       ignorePatterns,
       minCoverageToIgnorePct: Number.isFinite(minCoverageToIgnorePct)
         ? minCoverageToIgnorePct
         : 90,
+      autoDoneThresholdPct: COVERAGE_THRESHOLD,
     });
 
     // 3) Fusionar con cache previo: si una clase estaba DONE, mantener DONE
@@ -105,11 +113,13 @@ program
       version: oldCache.version ?? 1,
       generatedAt: new Date().toISOString(),
       xmlPath,
+      env,
       items: mergedItems,
     };
 
-    const cachePath = await saveCache(cache);
+    const cachePath = await saveCache(cache, undefined, { projectRoot });
     console.log(chalk.green(`Cache saved: ${cachePath}`));
+    console.log(chalk.gray(`Project root: ${projectRoot}`));
     logCacheSummary(cache);
   });
 
@@ -119,7 +129,13 @@ program
   .option("--sourceRoot <path>", "Root de fuentes Java", "src/main/java")
   .option("--testRoot <path>", "Root de tests Java", "src/test/java")
   .action(async (opts) => {
-    const cache = await loadCache();
+    // Cache is stored in the microservice project root.
+    // If the user runs `next` from another folder, try to locate jacoco.xml first by auto-detection.
+    const { autoDetectJacocoXml } = await import("./orchestrator.js");
+    const xmlPath = await autoDetectJacocoXml();
+    const projectRoot = xmlPath ? await findProjectRoot(xmlPath) : process.cwd();
+
+    const cache = await loadCache(undefined, { projectRoot });
     const item = pickNextMission(cache);
 
     if (!item) {
@@ -132,6 +148,7 @@ program
     const md = renderMissionMarkdown(item, {
       sourceRoot: opts.sourceRoot,
       testRoot: opts.testRoot,
+      env: cache.env ?? null,
     });
 
     console.log(md);
@@ -142,7 +159,13 @@ program
   .description("Marca una clase como DONE en el cache local")
   .argument("<className>", "Nombre fully-qualified de la clase (e.g. com.foo.BarService)")
   .action(async (className) => {
-    const cache = await loadCache();
+    // mark-done kept for backwards compatibility, but the intended workflow is now:
+    // write tests -> run tests -> analyze -> next
+    const { autoDetectJacocoXml } = await import("./orchestrator.js");
+    const xmlPath = await autoDetectJacocoXml();
+    const projectRoot = xmlPath ? await findProjectRoot(xmlPath) : process.cwd();
+
+    const cache = await loadCache(undefined, { projectRoot });
     const res = markDone(cache, className);
 
     if (!res.updated) {
@@ -155,7 +178,7 @@ program
       return;
     }
 
-    const cachePath = await saveCache(cache);
+    const cachePath = await saveCache(cache, undefined, { projectRoot });
     console.log(chalk.green(`DONE: ${className}`));
     console.log(chalk.cyan(`Cache updated: ${cachePath}`));
     logCacheSummary(cache);
