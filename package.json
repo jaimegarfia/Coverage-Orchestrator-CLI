@@ -1,6 +1,6 @@
 {
   "name": "coverage-orchestrator-cli",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "CLI to orchestrate AI agents for automated Java test generation based on JaCoCo coverage reports",
   "main": "src/index.js",
   "scripts": {
