@@ -1,0 +1,31 @@
+# Archivos que NO se deben publicar a npm
+
+# Cache local generado por el CLI
+.coverage-cache.json
+
+# Ejemplos y tests (si los añades en el futuro)
+examples/
+test/
+*.test.js
+
+# Archivos de desarrollo
+.vscode/
+.idea/
+*.log
+npm-debug.log*
+
+# Environment files
+.env
+.env.local
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Guía de publicación (no necesaria para usuarios finales)
+PUBLISH.md
