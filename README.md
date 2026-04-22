@@ -161,25 +161,6 @@ coverage-orchestrator mark-done com.foo.BarService
 - Enriquecer el “prompt” con dependencias reales (parseando imports / constructor injection)
 - Modo `--format json` además de Markdown
 
----
-
-## Publicación a npm
-
-Para publicar este paquete a npm y hacerlo disponible públicamente, consulta la guía detallada en [PUBLISH.md](./PUBLISH.md).
-
-**Resumen rápido:**
-
-1. Inicia sesión en npm: `npm login`
-2. Verifica el contenido: `npm pack --dry-run`
-3. Publica: `npm publish`
-
-Una vez publicado, cualquier usuario podrá ejecutar:
-
-```bash
-npx coverage-orchestrator-cli analyze
-```
-
----
 
 ## Licencia
 

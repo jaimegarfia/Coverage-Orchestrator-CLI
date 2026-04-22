@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-04-22T08:28:23.457Z",
+  "generatedAt": "2026-04-22T09:15:38.682Z",
   "xmlPath": "C:\\Users\\jgarfiaa\\Proyectos\\mall\\mall-portal\\target\\site\\jacoco\\jacoco.xml",
   "items": [
     {
@@ -149,77 +149,8 @@
           }
         ]
       },
-      "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
-    },
-    {
-      "className": "com.macro.mall.portal.service.impl.UmsMemberCouponServiceImpl",
-      "packageName": "com/macro/mall/portal/service/impl",
-      "sourceFilename": "UmsMemberCouponServiceImpl.java",
-      "internalName": "com/macro/mall/portal/service/impl/UmsMemberCouponServiceImpl",
-      "metrics": {
-        "missedLines": 129,
-        "coveredLines": 0,
-        "coveragePct": 0,
-        "complexityTotal": 41
-      },
-      "priorityScore": 5289,
-      "methods": {
-        "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 27
-          },
-          {
-            "name": "add",
-            "desc": "(Ljava/lang/Long;)V",
-            "line": 44
-          },
-          {
-            "name": "generateCouponCode",
-            "desc": "(Ljava/lang/Long;)Ljava/lang/String;",
-            "line": 86
-          },
-          {
-            "name": "listHistory",
-            "desc": "(Ljava/lang/Integer;)Ljava/util/List;",
-            "line": 104
-          },
-          {
-            "name": "listCart",
-            "desc": "(Ljava/util/List;Ljava/lang/Integer;)Ljava/util/List;",
-            "line": 116
-          },
-          {
-            "name": "listByProduct",
-            "desc": "(Ljava/lang/Long;)Ljava/util/List;",
-            "line": 174
-          },
-          {
-            "name": "list",
-            "desc": "(Ljava/lang/Integer;)Ljava/util/List;",
-            "line": 209
-          },
-          {
-            "name": "calcTotalAmount",
-            "desc": "(Ljava/util/List;)Ljava/math/BigDecimal;",
-            "line": 214
-          },
-          {
-            "name": "calcTotalAmountByproductCategoryId",
-            "desc": "(Ljava/util/List;Ljava/util/List;)Ljava/math/BigDecimal;",
-            "line": 223
-          },
-          {
-            "name": "calcTotalAmountByProductId",
-            "desc": "(Ljava/util/List;Ljava/util/List;)Ljava/math/BigDecimal;",
-            "line": 234
-          }
-        ]
-      },
-      "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "status": "DONE",
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.service.impl.PmsPortalProductServiceImpl",
@@ -283,7 +214,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.service.impl.AlipayServiceImpl",
@@ -332,7 +263,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.domain.OmsOrderReturnApplyParam",
@@ -516,7 +447,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.service.impl.UmsMemberServiceImpl",
@@ -550,7 +481,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.controller.OmsCartItemController",
@@ -614,7 +545,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.service.impl.UmsMemberReceiveAddressServiceImpl",
@@ -663,7 +594,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.controller.UmsMemberController",
@@ -717,7 +648,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.controller.OmsPortalOrderController",
@@ -791,7 +722,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.config.AlipayConfig",
@@ -905,7 +836,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.domain.PmsPortalProductDetail",
@@ -1009,7 +940,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.config.RabbitMqConfig",
@@ -1063,7 +994,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.controller.UmsMemberReceiveAddressController",
@@ -1112,7 +1043,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.service.impl.OmsCartItemServiceImpl",
@@ -1136,7 +1067,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.controller.MemberAttentionController",
@@ -1185,7 +1116,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.controller.MemberProductCollectionController",
@@ -1234,7 +1165,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.controller.AlipayController",
@@ -1278,7 +1209,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.454Z"
+      "updatedAt": "2026-04-22T09:15:38.679Z"
     },
     {
       "className": "com.macro.mall.portal.domain.ConfirmOrderResult",
@@ -1362,7 +1293,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.controller.HomeController",
@@ -1416,7 +1347,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.controller.MemberReadHistoryController",
@@ -1460,7 +1391,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.controller.UmsMemberCouponController",
@@ -1509,7 +1440,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.domain.ConfirmOrderResult$CalcAmount",
@@ -1573,7 +1504,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.service.impl.PmsPortalBrandServiceImpl",
@@ -1612,7 +1543,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.domain.MemberProductCollection",
@@ -1651,61 +1582,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
-    },
-    {
-      "className": "com.macro.mall.portal.domain.SmsCouponHistoryDetail",
-      "packageName": "com/macro/mall/portal/domain",
-      "sourceFilename": "SmsCouponHistoryDetail.java",
-      "internalName": "com/macro/mall/portal/domain/SmsCouponHistoryDetail",
-      "metrics": {
-        "missedLines": 5,
-        "coveredLines": 0,
-        "coveragePct": 0,
-        "complexityTotal": 7
-      },
-      "priorityScore": 35,
-      "methods": {
-        "zeroCoverage": [
-          {
-            "name": "<init>",
-            "desc": "()V",
-            "line": 19
-          },
-          {
-            "name": "getCoupon",
-            "desc": "()Lcom/macro/mall/model/SmsCoupon;",
-            "line": 21
-          },
-          {
-            "name": "getProductRelationList",
-            "desc": "()Ljava/util/List;",
-            "line": 23
-          },
-          {
-            "name": "getCategoryRelationList",
-            "desc": "()Ljava/util/List;",
-            "line": 25
-          },
-          {
-            "name": "setCoupon",
-            "desc": "(Lcom/macro/mall/model/SmsCoupon;)V",
-            "line": 18
-          },
-          {
-            "name": "setProductRelationList",
-            "desc": "(Ljava/util/List;)V",
-            "line": 18
-          },
-          {
-            "name": "setCategoryRelationList",
-            "desc": "(Ljava/util/List;)V",
-            "line": 18
-          }
-        ]
-      },
-      "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.config.SwaggerConfig",
@@ -1739,7 +1616,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.controller.PmsPortalProductController",
@@ -1778,7 +1655,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.controller.PmsPortalBrandController",
@@ -1817,7 +1694,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.domain.FlashPromotionProduct",
@@ -1866,7 +1743,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.config.GlobalCorsConfig",
@@ -1895,7 +1772,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.controller.OmsPortalOrderReturnApplyController",
@@ -1924,7 +1801,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.domain.CartProduct",
@@ -1963,7 +1840,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.component.CancelOrderReceiver",
@@ -1997,7 +1874,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.service.impl.OmsPortalOrderReturnApplyServiceImpl",
@@ -2026,7 +1903,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.component.CancelOrderSender",
@@ -2055,7 +1932,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.component.OrderTimeOutCancelTask",
@@ -2084,7 +1961,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.domain.PmsProductCategoryNode",
@@ -2118,7 +1995,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.config.JacksonConfig",
@@ -2147,7 +2024,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.MallPortalApplication",
@@ -2176,7 +2053,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.component.CancelOrderSender$1",
@@ -2205,7 +2082,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.config.MallSecurityConfig",
@@ -2239,7 +2116,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.config.AlipayClientConfig",
@@ -2268,7 +2145,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.service.impl.OmsPromotionServiceImpl$2",
@@ -2292,7 +2169,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.service.impl.OmsPromotionServiceImpl$1",
@@ -2316,7 +2193,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.config.SpringTaskConfig",
@@ -2340,7 +2217,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     },
     {
       "className": "com.macro.mall.portal.config.MyBatisConfig",
@@ -2364,7 +2241,7 @@
         ]
       },
       "status": "TODO",
-      "updatedAt": "2026-04-22T08:28:23.457Z"
+      "updatedAt": "2026-04-22T09:15:38.682Z"
     }
   ]
 }

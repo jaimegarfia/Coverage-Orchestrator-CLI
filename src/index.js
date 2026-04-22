@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import chalk from "chalk";
+import Table from "cli-table3";
 import { parseJacocoXml } from "./parser.js";
 import {
   buildCacheItems,
@@ -40,12 +41,12 @@ program
   )
   .action(async (opts) => {
     let xmlPath = opts.path;
-    
+
     // Auto-detect jacoco.xml if --path not provided
     if (!xmlPath) {
       const { autoDetectJacocoXml } = await import("./orchestrator.js");
       xmlPath = await autoDetectJacocoXml();
-      
+
       if (!xmlPath) {
         console.log(chalk.red("No se encontró jacoco.xml automáticamente."));
         console.log(chalk.yellow("Rutas buscadas:"));
@@ -53,22 +54,33 @@ program
         console.log("  - build/reports/jacoco/test/jacocoTestReport.xml (Gradle)");
         console.log("");
         console.log(chalk.cyan("Por favor, especifica la ruta manualmente:"));
-        console.log(chalk.white("  coverage-orchestrator analyze --path <ruta_al_jacoco.xml>"));
+        console.log(
+          chalk.white(
+            "  coverage-orchestrator analyze --path <ruta_al_jacoco.xml>",
+          ),
+        );
         process.exitCode = 1;
         return;
       }
-      
+
       console.log(chalk.green(`✓ JaCoCo XML auto-detectado: ${xmlPath}`));
     }
-    
+
     const minCoverageToIgnorePct = Number.parseFloat(opts.minCoverageToIgnore);
     const includePatterns = opts.include ?? [];
     const ignorePatterns = opts.ignore ?? null;
 
+    // 1) Cargar cache previo (si existe) para preservar estados DONE
+    const oldCache = await loadCache();
+    const oldItemsByClass = new Map(
+      (oldCache.items ?? []).map((it) => [it.className, it]),
+    );
+
     console.log(chalk.cyan(`Parsing JaCoCo report: ${xmlPath}`));
     const parsed = await parseJacocoXml(xmlPath);
 
-    const items = buildCacheItems(parsed, {
+    // 2) Construir nuevos items (status TODO por defecto)
+    const newItemsRaw = buildCacheItems(parsed, {
       includePatterns,
       ignorePatterns,
       minCoverageToIgnorePct: Number.isFinite(minCoverageToIgnorePct)
@@ -76,11 +88,24 @@ program
         : 90,
     });
 
+    // 3) Fusionar con cache previo: si una clase estaba DONE, mantener DONE
+    const mergedItems = newItemsRaw.map((newItem) => {
+      const old = oldItemsByClass.get(newItem.className);
+      if (old && old.status === "DONE") {
+        return {
+          ...newItem,
+          status: "DONE",
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      return newItem;
+    });
+
     const cache = {
-      version: 1,
+      version: oldCache.version ?? 1,
       generatedAt: new Date().toISOString(),
       xmlPath,
-      items,
+      items: mergedItems,
     };
 
     const cachePath = await saveCache(cache);
@@ -134,6 +159,138 @@ program
     console.log(chalk.green(`DONE: ${className}`));
     console.log(chalk.cyan(`Cache updated: ${cachePath}`));
     logCacheSummary(cache);
+  });
+
+program
+  .command("summary")
+  .description("Muestra un resumen global de cobertura basado en .coverage-cache.json")
+  .option("--json", "Devuelve el resumen en formato JSON")
+  .action(async (opts) => {
+    const cache = await loadCache();
+    const items = cache.items ?? [];
+
+    if (items.length === 0) {
+      console.log(
+        chalk.yellow(
+          "No hay datos en el cache. Ejecuta primero: coverage-orchestrator analyze",
+        ),
+      );
+      return;
+    }
+
+    // 1) Agregados globales (sumando todas las clases del cache)
+    let totalMissed = 0;
+    let totalCovered = 0;
+
+    for (const it of items) {
+      totalMissed += it.metrics?.missedLines ?? 0;
+      totalCovered += it.metrics?.coveredLines ?? 0;
+    }
+
+    const totalLines = totalMissed + totalCovered;
+    const globalCoveragePct = totalLines > 0 ? (totalCovered / totalLines) * 100 : 0;
+
+    // Gap respecto a target 60%
+    const targetPct = 60;
+    const gapPct = targetPct - globalCoveragePct;
+
+    // 2) Top 5 por priorityScore
+    const sortedByPriority = [...items].sort(
+      (a, b) => b.priorityScore - a.priorityScore,
+    );
+    const top5 = sortedByPriority.slice(0, 5);
+
+    // 3) Siguiente recomendación (primera clase TODO) sin modificar el cache
+    const next = pickNextMission(cache);
+
+    const data = {
+      total: {
+        missedLines: totalMissed,
+        coveredLines: totalCovered,
+        totalLines,
+        coveragePct: Number(globalCoveragePct.toFixed(2)),
+        targetPct,
+        gapPct: Number(gapPct.toFixed(2)),
+      },
+      topByPriority: top5.map((it) => ({
+        className: it.className,
+        coveragePct: Number(it.metrics.coveragePct.toFixed(2)),
+        priorityScore: it.priorityScore,
+        status: it.status,
+      })),
+      nextRecommendation: next
+        ? {
+            className: next.className,
+            coveragePct: Number(next.metrics.coveragePct.toFixed(2)),
+            priorityScore: next.priorityScore,
+            status: next.status,
+          }
+        : null,
+      cacheMeta: {
+        generatedAt: cache.generatedAt,
+        xmlPath: cache.xmlPath,
+        items: items.length,
+      },
+    };
+
+    // Modo JSON
+    if (opts.json) {
+      console.log(JSON.stringify(data, null, 2));
+      return;
+    }
+
+    // Modo humano con tabla
+    console.log(
+      chalk.cyan("== Resumen global de cobertura (desde .coverage-cache.json) =="),
+    );
+    console.log(
+      `Líneas totales: ${totalLines}  |  Covered: ${totalCovered}  |  Missed: ${totalMissed}`,
+    );
+    console.log(
+      `Coverage actual: ${globalCoveragePct.toFixed(
+        2,
+      )}%  |  Target: ${targetPct}%  |  Gap: ${gapPct.toFixed(2)}%`,
+    );
+    console.log("");
+
+    const table = new Table({
+      head: [
+        chalk.white("Class"),
+        chalk.white("Coverage %"),
+        chalk.white("PriorityScore"),
+        chalk.white("Status"),
+      ],
+    });
+
+    for (const it of top5) {
+      table.push([
+        it.className,
+        `${it.metrics.coveragePct.toFixed(2)}%`,
+        it.priorityScore,
+        it.status,
+      ]);
+    }
+
+    console.log(chalk.cyan("Top 5 clases por PriorityScore:"));
+    console.log(table.toString());
+    console.log("");
+
+    if (next) {
+      console.log(
+        chalk.green("Siguiente recomendación (sin modificar el cache):"),
+      );
+      console.log(
+        `- Clase: ${next.className} | Coverage: ${next.metrics.coveragePct.toFixed(
+          2,
+        )}% | PriorityScore: ${next.priorityScore} | Status: ${next.status}`,
+      );
+    } else {
+      console.log(
+        chalk.green(
+          "No hay siguiente recomendación: todas las clases están DONE o el cache está vacío.",
+        ),
+      );
+    }
   });
 
 program.parseAsync(process.argv);
