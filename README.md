@@ -248,16 +248,18 @@ coverage-orchestrator summary --json
 ## Cache y modelo de estado
 
 ### Dónde se guarda el cache
-El cache se guarda en **un único lugar** por repositorio (fuente de verdad):
+El cache se guarda **por microservicio/módulo** (aislamiento total):
 
-- `<repoRoot>/.coverage-cache.json`
+- `<moduleRoot>/.coverage-cache.json`
 
-**Cómo se decide el `repoRoot`:**
-- Si pasas `--path`, el CLI sube directorios desde el `jacoco.xml` y busca *todos* los `pom.xml` / `build.gradle(.kts)` encontrados; el `repoRoot` es el **más alto** (más cercano a la raíz del repo).
-- Si NO pasas `--path`, el CLI intenta auto-detectar el `jacoco.xml` en el directorio actual y, si no lo encuentra, hace una búsqueda recursiva limitada (pensado para monorepos con múltiples microservicios).
+**Cómo se decide el `moduleRoot`:**
+- En `analyze`, si pasas `--path`, el CLI sube directorios desde el `jacoco.xml` y usa el **primer** directorio que contenga `pom.xml` o `build.gradle(.kts)` (la raíz más cercana). Ese es el `moduleRoot`.
+- Si NO pasas `--path`, el CLI intenta auto-detectar el `jacoco.xml` en el directorio actual y, si no lo encuentra, hace una búsqueda recursiva limitada.
 
-**Importante:** todos los comandos (`analyze`, `next`, `summary`, `mark-done`) usan exactamente la misma lógica para localizar el cache.
-Esto evita crear `.coverage-cache.json` en diferentes carpetas.
+**Importante (monorepo):**
+- `next` y `summary` **solo buscan** el cache en el directorio actual (`process.cwd()`).
+- Si no existe `.coverage-cache.json` en la carpeta actual, el CLI pide ejecutar el comando desde dentro del módulo o correr `analyze` ahí primero.
+- `analyze` hace una limpieza *best-effort* eliminando `.coverage-cache.json` en carpetas superiores para evitar colisiones con caches antiguos.
 
 ### Forma del cache (simplificada)
 

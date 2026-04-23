@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import path from "node:path";
+import fs from "fs-extra";
 import { Command } from "commander";
 import chalk from "chalk";
 import Table from "cli-table3";
@@ -135,8 +137,24 @@ program
     const includePatterns = opts.include ?? [];
     const ignorePatterns = opts.ignore ?? null;
 
-    // 0) Detectar projectRoot basándonos en la ubicación del jacoco.xml (best-effort)
+    // 0) Detectar projectRoot (módulo/microservicio) basándonos en la ubicación del jacoco.xml
     const projectRoot = await findProjectRoot(xmlPath);
+
+    // Blindaje (monorepo): si existe un cache en el directorio padre, advertimos pero NO lo tocamos
+    // (nunca mezclamos datos entre microservicios).
+    try {
+      const parentCache = path.resolve(path.dirname(projectRoot), ".coverage-cache.json");
+      if (await fs.pathExists(parentCache)) {
+        console.log(
+          chalk.yellow(
+            `Aviso: se detectó un cache en el directorio superior: ${parentCache}. ` +
+              `Este analyze NO lo usará ni lo mezclará.`,
+          ),
+        );
+      }
+    } catch {
+      // non-fatal
+    }
 
     // 1) Detectar entorno del proyecto real (incluyendo nombre de módulo best-effort)
     const env = await detectEnvironment({ projectRoot, xmlPath });
@@ -248,20 +266,28 @@ program
   .option("--sourceRoot <path>", "Root de fuentes Java", "src/main/java")
   .option("--testRoot <path>", "Root de tests Java", "src/test/java")
   .action(async (opts) => {
-    // El cache se guarda en el projectRoot del microservicio (mismo criterio que analyze).
-    // Si ejecutas `next` desde otra carpeta, auto-detectamos jacoco.xml para inferir el projectRoot.
-    const xmlPath =
-      (await autoDetectJacocoXml({ cwd: process.cwd(), recursive: false })) ??
-      (await autoDetectJacocoXml({ cwd: process.cwd(), recursive: true, maxDepth: 4 }));
-    const projectRoot = xmlPath ? await findProjectRoot(xmlPath) : process.cwd();
+    // Contexto de ejecución (monorepo):
+    // - next SOLO busca el cache en la carpeta actual (process.cwd()).
+    // - Si no existe, pedimos ejecutar desde el módulo o correr analyze allí.
+    const projectRoot = process.cwd();
+    const cachePath = path.resolve(projectRoot, ".coverage-cache.json");
+    const exists = await fs.pathExists(cachePath);
+
+    if (!exists) {
+      console.log(
+        chalk.red(
+          "No se encontró caché de cobertura en este directorio. Ejecuta 'analyze' primero dentro de este microservicio.",
+        ),
+      );
+      process.exitCode = 2;
+      return;
+    }
 
     const cache = await loadCache(undefined, { projectRoot });
     const item = pickNextMission(cache);
 
     if (!item) {
-      console.log(
-        chalk.green("No hay misiones pendientes. (cache vacío o todo DONE)"),
-      );
+      console.log(chalk.green("No hay misiones pendientes. (cache vacío o todo DONE)"));
       return;
     }
 
@@ -319,12 +345,23 @@ program
   .description("Muestra un resumen global de cobertura basado en .coverage-cache.json")
   .option("--json", "Devuelve el resumen en formato JSON")
   .action(async (opts) => {
-    // El resumen debe apuntar al mismo cache que analyze/next/mark-done.
-    // Si se ejecuta desde otra carpeta, intentamos inferir el microservicio por auto-detección del jacoco.xml.
-    const xmlPath =
-      (await autoDetectJacocoXml({ cwd: process.cwd(), recursive: false })) ??
-      (await autoDetectJacocoXml({ cwd: process.cwd(), recursive: true, maxDepth: 4 }));
-    const projectRoot = xmlPath ? await findProjectRoot(xmlPath) : process.cwd();
+    // Contexto de ejecución (monorepo):
+    // - summary SOLO busca el cache en la carpeta actual (process.cwd()).
+    // - Si no existe, pedimos ejecutar desde el módulo o correr analyze allí.
+    const projectRoot = process.cwd();
+    const cachePath = path.resolve(projectRoot, ".coverage-cache.json");
+    const exists = await fs.pathExists(cachePath);
+
+    if (!exists) {
+      console.log(
+        chalk.red(
+          "No se encontró caché de cobertura en este directorio. Ejecuta 'analyze' primero dentro de este microservicio.",
+        ),
+      );
+      process.exitCode = 2;
+      return;
+    }
+
     const cache = await loadCache(undefined, { projectRoot });
     const items = cache.items ?? [];
 

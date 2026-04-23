@@ -134,36 +134,19 @@ async function detectLombokFromGradle(projectRoot) {
 }
 
 /**
- * Find the project root based on a JaCoCo xml path.
- * It walks up directories until it finds a pom.xml or build.gradle(.kts).
- *
- * @param {string} xmlPath absolute path to jacoco.xml
- * @returns {Promise<string>} directory considered as project root (fallback: directory containing xmlPath)
- */
-export async function findProjectRoot(xmlPath) {
-  // Back-compat: previously this returned the *nearest* build file going upwards (module root).
-  // It now returns the repo-level root (closest to filesystem root) among all build files found
-  // when walking upwards from the jacoco.xml location.
-  return findRepoRootFromXml(xmlPath);
-}
-
-/**
- * Find repo root from a JaCoCo xml path.
+ * Find the project root (microservice/module root) based on a JaCoCo xml path.
  * Strategy:
  * - Walk up from the directory containing jacoco.xml to filesystem root.
- * - Collect every directory that contains pom.xml or build.gradle(.kts).
- * - Return the "highest" one (the closest to filesystem root), i.e. the repo root / aggregator build.
+ * - Return the FIRST directory that contains pom.xml or build.gradle(.kts).
  *
- * This enforces a single source of truth for .coverage-cache.json across commands.
+ * This enforces cache isolation per microservice/module in monorepos.
  *
  * @param {string} xmlPath absolute path to jacoco.xml
- * @returns {Promise<string>} repo root (fallback: directory containing xmlPath)
+ * @returns {Promise<string>} module root (fallback: directory containing xmlPath)
  */
-export async function findRepoRootFromXml(xmlPath) {
+export async function findProjectRoot(xmlPath) {
   const startDir = path.resolve(path.dirname(xmlPath));
   let current = startDir;
-
-  let lastBuildRoot = null;
 
   // Walk up until filesystem root
   while (true) {
@@ -176,8 +159,8 @@ export async function findRepoRootFromXml(xmlPath) {
       (await fs.pathExists(gradle)) ||
       (await fs.pathExists(gradleKts))
     ) {
-      // Keep updating; the last one found while walking up is the highest/root-most.
-      lastBuildRoot = current;
+      // Nearest build file = module root
+      return current;
     }
 
     const parent = path.dirname(current);
@@ -185,7 +168,7 @@ export async function findRepoRootFromXml(xmlPath) {
     current = parent;
   }
 
-  return lastBuildRoot ?? startDir;
+  return startDir;
 }
 
 function findInObject(obj, pathArr) {
