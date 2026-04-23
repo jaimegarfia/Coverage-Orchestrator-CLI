@@ -13,19 +13,51 @@ export function getCachePathForRoot(projectRoot, cacheFile = DEFAULT_CACHE_FILE)
  * Intenta auto-detectar jacoco.xml en rutas comunes (Maven/Gradle)
  * @returns {Promise<string|null>} ruta al jacoco.xml o null si no se encuentra
  */
-export async function autoDetectJacocoXml() {
-  const candidates = [
-    "target/site/jacoco/jacoco.xml",           // Maven default
+export async function autoDetectJacocoXml({
+  cwd = process.cwd(),
+  recursive = false,
+  maxDepth = 4,
+} = {}) {
+  // Direct candidates (relative to cwd)
+  const directCandidates = [
+    "target/site/jacoco/jacoco.xml", // Maven default
     "build/reports/jacoco/test/jacocoTestReport.xml", // Gradle default
   ];
 
-  for (const candidate of candidates) {
-    if (await fs.pathExists(candidate)) {
-      return path.resolve(candidate);
-    }
+  for (const candidate of directCandidates) {
+    const p = path.resolve(cwd, candidate);
+    if (await fs.pathExists(p)) return p;
   }
 
-  return null;
+  if (!recursive) return null;
+
+  // Recursive search (best-effort) for monorepos / multi-microservice folders.
+  // We limit depth to avoid scanning huge trees.
+  async function walk(dir, depth) {
+    if (depth > maxDepth) return null;
+
+    // If this directory looks like a project root, check typical jacoco locations here too.
+    for (const candidate of directCandidates) {
+      const p = path.resolve(dir, candidate);
+      if (await fs.pathExists(p)) return p;
+    }
+
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    for (const e of entries) {
+      if (!e.isDirectory()) continue;
+      const name = e.name;
+      if (name === "node_modules" || name === ".git" || name === "target" || name === "build") {
+        continue;
+      }
+
+      const found = await walk(path.join(dir, name), depth + 1);
+      if (found) return found;
+    }
+
+    return null;
+  }
+
+  return walk(path.resolve(cwd), 0);
 }
 
 export function getCachePath(cacheFile = DEFAULT_CACHE_FILE) {

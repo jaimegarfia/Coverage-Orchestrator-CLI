@@ -5,6 +5,7 @@ import Table from "cli-table3";
 import { parseJacocoXml } from "./parser.js";
 import { detectEnvironment, findProjectRoot } from "./detector.js";
 import {
+  autoDetectJacocoXml,
   buildCacheItems,
   loadCache,
   logCacheSummary,
@@ -82,8 +83,10 @@ program
 
     // Auto-detect jacoco.xml if --path not provided
     if (!xmlPath) {
-      const { autoDetectJacocoXml } = await import("./orchestrator.js");
-      xmlPath = await autoDetectJacocoXml();
+      // Primero intentamos en el cwd actual; si no, hacemos búsqueda recursiva (útil en monorepos).
+      xmlPath =
+        (await autoDetectJacocoXml({ cwd: process.cwd(), recursive: false })) ??
+        (await autoDetectJacocoXml({ cwd: process.cwd(), recursive: true, maxDepth: 4 }));
 
       if (!xmlPath) {
         console.log(chalk.red("No se encontró jacoco.xml automáticamente."));
@@ -136,16 +139,42 @@ program
       autoDoneThresholdPct: COVERAGE_THRESHOLD,
     });
 
-    // 3) Fusionar con cache previo: si una clase estaba DONE, mantener DONE
+    // 3) Fusionar con cache previo
+    //
+    // Fuente de verdad: JaCoCo XML.
+    // - El status base se calcula desde el XML (Auto-DONE si coveragePct >= threshold).
+    // - Nunca mantenemos DONE "manual" si el XML actual dice que la cobertura no cumple el umbral.
+    //   (Ej: coverage 0% => siempre TODO).
+    //
+    // Lo único que preservamos del cache anterior es el "marcado manual" cuando el XML lo permite,
+    // para no perder el trabajo del usuario en clases que sí superan el umbral.
     const mergedItems = newItemsRaw.map((newItem) => {
       const old = oldItemsByClass.get(newItem.className);
-      if (old && old.status === "DONE") {
+      if (!old) return newItem;
+
+      const threshold = COVERAGE_THRESHOLD;
+      const coveragePct = newItem.metrics?.coveragePct ?? 0;
+
+      // Si el XML no cumple threshold => jamás DONE, aunque estuviera DONE antes.
+      if (!(coveragePct >= threshold)) {
         return {
           ...newItem,
-          status: "DONE",
+          status: "TODO",
+          autoVerified: false,
           updatedAt: new Date().toISOString(),
         };
       }
+
+      // Si el XML sí cumple threshold, se respeta DONE si estaba previamente DONE (manual)
+      if (old.status === "DONE") {
+        return {
+          ...newItem,
+          status: "DONE",
+          autoVerified: newItem.autoVerified ?? false,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+
       return newItem;
     });
 
@@ -169,10 +198,11 @@ program
   .option("--sourceRoot <path>", "Root de fuentes Java", "src/main/java")
   .option("--testRoot <path>", "Root de tests Java", "src/test/java")
   .action(async (opts) => {
-    // Cache is stored in the microservice project root.
-    // If the user runs `next` from another folder, try to locate jacoco.xml first by auto-detection.
-    const { autoDetectJacocoXml } = await import("./orchestrator.js");
-    const xmlPath = await autoDetectJacocoXml();
+    // El cache se guarda en el projectRoot del microservicio (mismo criterio que analyze).
+    // Si ejecutas `next` desde otra carpeta, auto-detectamos jacoco.xml para inferir el projectRoot.
+    const xmlPath =
+      (await autoDetectJacocoXml({ cwd: process.cwd(), recursive: false })) ??
+      (await autoDetectJacocoXml({ cwd: process.cwd(), recursive: true, maxDepth: 4 }));
     const projectRoot = xmlPath ? await findProjectRoot(xmlPath) : process.cwd();
 
     const cache = await loadCache(undefined, { projectRoot });
@@ -201,8 +231,12 @@ program
   .action(async (className) => {
     // mark-done kept for backwards compatibility, but the intended workflow is now:
     // write tests -> run tests -> analyze -> next
-    const { autoDetectJacocoXml } = await import("./orchestrator.js");
-    const xmlPath = await autoDetectJacocoXml();
+    //
+    // IMPORTANTE: el cache está asociado al microservicio (projectRoot). Por eso resolvemos el
+    // projectRoot del mismo modo que `analyze`, a partir del jacoco.xml auto-detectado.
+    const xmlPath =
+      (await autoDetectJacocoXml({ cwd: process.cwd(), recursive: false })) ??
+      (await autoDetectJacocoXml({ cwd: process.cwd(), recursive: true, maxDepth: 4 }));
     const projectRoot = xmlPath ? await findProjectRoot(xmlPath) : process.cwd();
 
     const cache = await loadCache(undefined, { projectRoot });
@@ -229,7 +263,13 @@ program
   .description("Muestra un resumen global de cobertura basado en .coverage-cache.json")
   .option("--json", "Devuelve el resumen en formato JSON")
   .action(async (opts) => {
-    const cache = await loadCache();
+    // El resumen debe apuntar al mismo cache que analyze/next/mark-done.
+    // Si se ejecuta desde otra carpeta, intentamos inferir el microservicio por auto-detección del jacoco.xml.
+    const xmlPath =
+      (await autoDetectJacocoXml({ cwd: process.cwd(), recursive: false })) ??
+      (await autoDetectJacocoXml({ cwd: process.cwd(), recursive: true, maxDepth: 4 }));
+    const projectRoot = xmlPath ? await findProjectRoot(xmlPath) : process.cwd();
+    const cache = await loadCache(undefined, { projectRoot });
     const items = cache.items ?? [];
 
     if (items.length === 0) {

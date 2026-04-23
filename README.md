@@ -252,6 +252,13 @@ El cache se guarda dentro del **projectRoot** del microservicio:
 
 - `<projectRoot>/.coverage-cache.json`
 
+**Cómo se decide el `projectRoot`:**
+- Si pasas `--path`, el `projectRoot` se resuelve subiendo directorios desde el `jacoco.xml` hasta encontrar `pom.xml` o `build.gradle(.kts)`.
+- Si NO pasas `--path`, el CLI intenta auto-detectar el `jacoco.xml` en el directorio actual y, si no lo encuentra, hace una búsqueda recursiva limitada (pensado para monorepos con múltiples microservicios).
+
+**Importante:** todos los comandos (`analyze`, `next`, `summary`, `mark-done`) usan exactamente la misma lógica para localizar el cache del microservicio.
+Si estás en la raíz de un monorepo (por ejemplo `mall/`) y el JaCoCo está en `mall-admin/`, el CLI asociará el cache a `mall-admin/` (no al monorepo).
+
 Esto hace que el estado sea **por microservicio**, evitando confusiones al ejecutar el CLI desde otros directorios.
 
 ### Forma del cache (simplificada)
@@ -373,4 +380,3 @@ Recomendado:
 ## Licencia
 
 ISC
-
