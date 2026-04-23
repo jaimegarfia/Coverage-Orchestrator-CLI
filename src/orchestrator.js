@@ -193,7 +193,13 @@ export function buildCacheItems(
 }
 
 export function pickNextMission(cache) {
-  const next = (cache?.items ?? []).find((i) => i.status !== "DONE" && i.status !== "SKIPPED");
+  // Resiliencia: si attempts ya superó el límite, tratamos el item como SKIPPED (aunque status no lo refleje)
+  const next = (cache?.items ?? []).find(
+    (i) =>
+      i.status !== "DONE" &&
+      i.status !== "SKIPPED" &&
+      !((Number.isFinite(i.attempts) ? i.attempts : 0) >= 5),
+  );
   return next ?? null;
 }
 

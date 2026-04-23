@@ -113,6 +113,16 @@ export async function parseJacocoXml(xmlPath) {
       const sourceFilename = getAttr(c, "sourcefilename");
 
       const classCountersMap = getCounters(c);
+
+      // Filtro de interfaces / clases sin bytecode instrumentable:
+      // Si INSTRUCTION total es 0, JaCoCo suele estar reportando interfaces/holders sin instrucciones.
+      // Ignoramos totalmente estas clases para evitar "DONE" falsos y ruido en el backlog.
+      const instr = classCountersMap.get("INSTRUCTION") ?? { missed: 0, covered: 0 };
+      const totalInstr = (instr.missed ?? 0) + (instr.covered ?? 0);
+      if (totalInstr === 0) {
+        continue;
+      }
+
       const lineCounter = classCountersMap.get("LINE") ?? { missed: 0, covered: 0 };
       const classLineCoveragePct = pct(lineCounter.covered, lineCounter.missed);
 

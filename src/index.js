@@ -22,7 +22,7 @@ function buildSuggestedTestCommand({ env, item }) {
 
   const simpleName = String(item.className).split(".").pop();
   const testClass = `${simpleName}Test`;
-  const module = env.moduleName && env.moduleName !== "." ? env.moduleName : null;
+  const module = env.moduleName ? env.moduleName : null;
 
   if (env.buildTool === "Maven") {
     // -pl only if we can infer module
@@ -201,25 +201,35 @@ program
       // attempts: preservar contador entre análisis
       const prevAttempts = Number.isFinite(old.attempts) ? old.attempts : 0;
 
+      // Resiliencia / strikes:
+      // - Si esta clase fue la última recomendada (top candidate) y NO mejora su cobertura vs análisis anterior,
+      //   incrementamos attempts. Esto cubre casos de fallo de compilación/ejecución o tests que no mueven cobertura.
+      // - Si llega a attempts >= 5, la forzamos a SKIPPED.
+      const oldCoveragePct = old.metrics?.coveragePct ?? null;
+      const isSameAsOldTop = oldTopCandidateClassName === newItem.className;
+      const didImprove =
+        typeof oldCoveragePct === "number" && Number.isFinite(oldCoveragePct)
+          ? coveragePct > oldCoveragePct
+          : true;
+
+      let attempts = prevAttempts;
+      if (isSameAsOldTop && !didImprove) {
+        attempts = prevAttempts + 1;
+      }
+
+      if (attempts >= 5) {
+        return {
+          ...newItem,
+          attempts,
+          status: "SKIPPED",
+          skipReason: "MAX_ATTEMPTS",
+          autoVerified: false,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+
       // Si el XML no cumple threshold => jamás DONE, aunque estuviera DONE antes.
-      // Además, si esta clase fue la última recomendada (top candidate) y sigue sin cumplir,
-      // incrementamos attempts.
       if (!(coveragePct >= threshold)) {
-        const isSameAsOldTop = oldTopCandidateClassName === newItem.className;
-        const attempts = isSameAsOldTop ? prevAttempts + 1 : prevAttempts;
-
-        // Blacklist automática a partir de 3 intentos
-        if (attempts >= 3) {
-          return {
-            ...newItem,
-            attempts,
-            status: "SKIPPED",
-            skipReason: "MAX_ATTEMPTS",
-            autoVerified: false,
-            updatedAt: new Date().toISOString(),
-          };
-        }
-
         return {
           ...newItem,
           attempts,
@@ -284,6 +294,23 @@ program
     }
 
     const cache = await loadCache(undefined, { projectRoot });
+
+    // Forzado de SKIPPED: si hay items con attempts >= 5, marcarlos SKIPPED y persistir.
+    // Esto evita que queden "en limbo" si por cualquier motivo el status no se actualizó en analyze.
+    let mutated = false;
+    for (const it of cache.items ?? []) {
+      const attempts = Number.isFinite(it.attempts) ? it.attempts : 0;
+      if (attempts >= 5 && it.status !== "SKIPPED" && it.status !== "DONE") {
+        it.status = "SKIPPED";
+        it.skipReason = "MAX_ATTEMPTS";
+        it.updatedAt = new Date().toISOString();
+        mutated = true;
+      }
+    }
+    if (mutated) {
+      await saveCache(cache, undefined, { projectRoot });
+    }
+
     const item = pickNextMission(cache);
 
     if (!item) {

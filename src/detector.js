@@ -306,15 +306,14 @@ export async function detectEnvironment({ projectRoot = process.cwd(), xmlPath =
         : false;
 
   // Módulo (multi-módulo) best-effort:
-  // - Maven: directorio que contiene el jacoco.xml relativo al repo root.
-  // - Gradle: path ':sub:module' derivado del path relativo (con ':'), sin garantizar settings.gradle.
-  const moduleName =
-    xmlPath && root
-      ? path.relative(root, path.resolve(path.dirname(xmlPath))).split(path.sep)[0] || "."
-      : null;
+  // Queremos el nombre del módulo (ej. mall-admin), NO el folder del reporte (target/build/...).
+  // Estrategia:
+  // - Si tenemos projectRoot, el moduleName es el basename de ese directorio.
+  // - Gradle: derivamos gradleModulePath con ese moduleName (best-effort).
+  const moduleName = root ? path.basename(root) : null;
 
   const gradleModulePath =
-    buildTool === "Gradle" && moduleName && moduleName !== "." ? `:${moduleName}` : null;
+    buildTool === "Gradle" && moduleName ? `:${moduleName}` : null;
 
   const env = {
     language: "Java",
