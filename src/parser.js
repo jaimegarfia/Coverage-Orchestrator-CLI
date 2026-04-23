@@ -189,5 +189,14 @@ export function getZeroCoverageMethods(clazz) {
       if (name.includes("$")) return false;
       if (name === "<init>" || name === "<clinit>") return false;
       return true;
+    })
+    .filter((m) => {
+      // Lombok/boilerplate filter (best-effort).
+      // These methods are commonly generated and rarely worth targeting explicitly if they have no coverage.
+      // NOTE: We cannot reliably know if there is custom logic from JaCoCo alone, so we treat these as low ROI.
+      const name = m?.name ?? "";
+      const boilerplate = new Set(["equals", "hashCode", "toString", "canEqual"]);
+      if (boilerplate.has(name)) return false;
+      return true;
     });
 }

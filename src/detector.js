@@ -141,10 +141,31 @@ async function detectLombokFromGradle(projectRoot) {
  * @returns {Promise<string>} directory considered as project root (fallback: directory containing xmlPath)
  */
 export async function findProjectRoot(xmlPath) {
+  // Back-compat: previously this returned the *nearest* build file going upwards (module root).
+  // It now returns the repo-level root (closest to filesystem root) among all build files found
+  // when walking upwards from the jacoco.xml location.
+  return findRepoRootFromXml(xmlPath);
+}
+
+/**
+ * Find repo root from a JaCoCo xml path.
+ * Strategy:
+ * - Walk up from the directory containing jacoco.xml to filesystem root.
+ * - Collect every directory that contains pom.xml or build.gradle(.kts).
+ * - Return the "highest" one (the closest to filesystem root), i.e. the repo root / aggregator build.
+ *
+ * This enforces a single source of truth for .coverage-cache.json across commands.
+ *
+ * @param {string} xmlPath absolute path to jacoco.xml
+ * @returns {Promise<string>} repo root (fallback: directory containing xmlPath)
+ */
+export async function findRepoRootFromXml(xmlPath) {
   const startDir = path.resolve(path.dirname(xmlPath));
   let current = startDir;
 
-  // Stop when we reach filesystem root
+  let lastBuildRoot = null;
+
+  // Walk up until filesystem root
   while (true) {
     const pom = path.join(current, "pom.xml");
     const gradle = path.join(current, "build.gradle");
@@ -155,16 +176,16 @@ export async function findProjectRoot(xmlPath) {
       (await fs.pathExists(gradle)) ||
       (await fs.pathExists(gradleKts))
     ) {
-      return current;
+      // Keep updating; the last one found while walking up is the highest/root-most.
+      lastBuildRoot = current;
     }
 
     const parent = path.dirname(current);
-    if (parent === current) break; // reached root
+    if (parent === current) break;
     current = parent;
   }
 
-  // Fallback: directory containing jacoco.xml (or its folder)
-  return startDir;
+  return lastBuildRoot ?? startDir;
 }
 
 function findInObject(obj, pathArr) {
@@ -275,7 +296,7 @@ async function detectFromGradle(projectRoot) {
  * @param {string} opts.projectRoot Directory to look for pom.xml / build.gradle
  * @returns {Promise<{language:string, version:string|null, framework:string|null, frameworkVersion:string|null, buildTool:string|null, detection?:object}>}
  */
-export async function detectEnvironment({ projectRoot = process.cwd() } = {}) {
+export async function detectEnvironment({ projectRoot = process.cwd(), xmlPath = null } = {}) {
   const root = path.resolve(projectRoot);
 
   const [maven, gradle] = await Promise.all([
@@ -301,6 +322,17 @@ export async function detectEnvironment({ projectRoot = process.cwd() } = {}) {
         ? await detectLombokFromGradle(root)
         : false;
 
+  // Módulo (multi-módulo) best-effort:
+  // - Maven: directorio que contiene el jacoco.xml relativo al repo root.
+  // - Gradle: path ':sub:module' derivado del path relativo (con ':'), sin garantizar settings.gradle.
+  const moduleName =
+    xmlPath && root
+      ? path.relative(root, path.resolve(path.dirname(xmlPath))).split(path.sep)[0] || "."
+      : null;
+
+  const gradleModulePath =
+    buildTool === "Gradle" && moduleName && moduleName !== "." ? `:${moduleName}` : null;
+
   const env = {
     language: "Java",
     version: javaVersion,
@@ -309,6 +341,8 @@ export async function detectEnvironment({ projectRoot = process.cwd() } = {}) {
     buildTool,
     assertionLib: assertionLib ?? "JUnit 5 Assertions",
     usesLombok,
+    moduleName: moduleName ?? null,
+    gradleModulePath,
     detection: {
       projectRoot: root,
       fromPom: Boolean(maven),

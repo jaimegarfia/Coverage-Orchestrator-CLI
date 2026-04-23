@@ -15,6 +15,30 @@ import {
   saveCache,
 } from "./orchestrator.js";
 
+function buildSuggestedTestCommand({ env, item }) {
+  if (!env?.buildTool || !item?.className) return null;
+
+  const simpleName = String(item.className).split(".").pop();
+  const testClass = `${simpleName}Test`;
+  const module = env.moduleName && env.moduleName !== "." ? env.moduleName : null;
+
+  if (env.buildTool === "Maven") {
+    // -pl only if we can infer module
+    return module
+      ? `mvn test -pl ${module} -Dtest=${testClass}`
+      : `mvn test -Dtest=${testClass}`;
+  }
+
+  if (env.buildTool === "Gradle") {
+    const gradleModule = env.gradleModulePath ?? (module ? `:${module}` : null);
+    return gradleModule
+      ? `./gradlew ${gradleModule}:test --tests ${testClass}`
+      : `./gradlew test --tests ${testClass}`;
+  }
+
+  return null;
+}
+
 const program = new Command();
 
 program
@@ -114,14 +138,15 @@ program
     // 0) Detectar projectRoot basándonos en la ubicación del jacoco.xml (best-effort)
     const projectRoot = await findProjectRoot(xmlPath);
 
-    // 1) Detectar entorno del proyecto real
-    const env = await detectEnvironment({ projectRoot });
+    // 1) Detectar entorno del proyecto real (incluyendo nombre de módulo best-effort)
+    const env = await detectEnvironment({ projectRoot, xmlPath });
 
     // 2) Cargar cache previo del microservicio (si existe)
     const oldCache = await loadCache(undefined, { projectRoot });
     const oldItemsByClass = new Map(
       (oldCache.items ?? []).map((it) => [it.className, it]),
     );
+    const oldTopCandidateClassName = pickNextMission(oldCache)?.className ?? null;
 
     console.log(chalk.cyan(`Parsing JaCoCo report: ${xmlPath}`));
     const parsed = await parseJacocoXml(xmlPath);
@@ -155,10 +180,31 @@ program
       const threshold = COVERAGE_THRESHOLD;
       const coveragePct = newItem.metrics?.coveragePct ?? 0;
 
+      // attempts: preservar contador entre análisis
+      const prevAttempts = Number.isFinite(old.attempts) ? old.attempts : 0;
+
       // Si el XML no cumple threshold => jamás DONE, aunque estuviera DONE antes.
+      // Además, si esta clase fue la última recomendada (top candidate) y sigue sin cumplir,
+      // incrementamos attempts.
       if (!(coveragePct >= threshold)) {
+        const isSameAsOldTop = oldTopCandidateClassName === newItem.className;
+        const attempts = isSameAsOldTop ? prevAttempts + 1 : prevAttempts;
+
+        // Blacklist automática a partir de 3 intentos
+        if (attempts >= 3) {
+          return {
+            ...newItem,
+            attempts,
+            status: "SKIPPED",
+            skipReason: "MAX_ATTEMPTS",
+            autoVerified: false,
+            updatedAt: new Date().toISOString(),
+          };
+        }
+
         return {
           ...newItem,
+          attempts,
           status: "TODO",
           autoVerified: false,
           updatedAt: new Date().toISOString(),
@@ -169,13 +215,17 @@ program
       if (old.status === "DONE") {
         return {
           ...newItem,
+          attempts: prevAttempts,
           status: "DONE",
           autoVerified: newItem.autoVerified ?? false,
           updatedAt: new Date().toISOString(),
         };
       }
 
-      return newItem;
+      return {
+        ...newItem,
+        attempts: prevAttempts,
+      };
     });
 
     const cache = {
@@ -215,10 +265,16 @@ program
       return;
     }
 
+    const suggestedTestCommand = buildSuggestedTestCommand({
+      env: cache.env ?? null,
+      item,
+    });
+
     const md = renderMissionMarkdown(item, {
       sourceRoot: opts.sourceRoot,
       testRoot: opts.testRoot,
       env: cache.env ?? null,
+      suggestedTestCommand,
     });
 
     console.log(md);
@@ -356,20 +412,41 @@ program
     );
     console.log("");
 
+    // Nota: en algunas terminales (especialmente integradas) los caracteres de caja pueden renderizar raro.
+    // Forzamos el estilo ASCII para evitar cortes y “saltos” de línea.
     const table = new Table({
+      chars: {
+        top: "-",
+        "top-mid": "+",
+        "top-left": "+",
+        "top-right": "+",
+        bottom: "-",
+        "bottom-mid": "+",
+        "bottom-left": "+",
+        "bottom-right": "+",
+        left: "|",
+        "left-mid": "+",
+        mid: "-",
+        "mid-mid": "+",
+        right: "|",
+        "right-mid": "+",
+        middle: "|",
+      },
       head: [
-        chalk.white("Class"),
-        chalk.white("Coverage %"),
+        chalk.white("Clase"),
+        chalk.white("Cobertura %"),
         chalk.white("PriorityScore"),
         chalk.white("Status"),
       ],
+      wordWrap: true,
+      wrapOnWordBoundary: false,
     });
 
     for (const it of top5) {
       table.push([
         it.className,
         `${it.metrics.coveragePct.toFixed(2)}%`,
-        it.priorityScore,
+        String(it.priorityScore),
         it.status,
       ]);
     }

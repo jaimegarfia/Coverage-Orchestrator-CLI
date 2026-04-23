@@ -176,6 +176,10 @@ export function buildCacheItems(
         zeroCoverage: zeroMethods,
       },
 
+      // Persistencia / resiliencia:
+      // - attempts: nº de iteraciones en las que esta clase fue "asignada" por next pero no mejoró según analyze
+      // - status: TODO | DONE | SKIPPED (blacklist automática)
+      attempts: 0,
       status: isAutoDone ? "DONE" : "TODO",
       autoVerified: isAutoDone ? true : false,
       updatedAt: new Date().toISOString(),
@@ -189,7 +193,7 @@ export function buildCacheItems(
 }
 
 export function pickNextMission(cache) {
-  const next = (cache?.items ?? []).find((i) => i.status !== "DONE");
+  const next = (cache?.items ?? []).find((i) => i.status !== "DONE" && i.status !== "SKIPPED");
   return next ?? null;
 }
 
@@ -198,6 +202,16 @@ export function markDone(cache, className) {
   if (!item) return { updated: false, reason: "NOT_FOUND" };
 
   item.status = "DONE";
+  item.updatedAt = new Date().toISOString();
+  return { updated: true };
+}
+
+export function markSkipped(cache, className, { reason = "MAX_ATTEMPTS" } = {}) {
+  const item = (cache?.items ?? []).find((i) => i.className === className);
+  if (!item) return { updated: false, reason: "NOT_FOUND" };
+
+  item.status = "SKIPPED";
+  item.skipReason = reason;
   item.updatedAt = new Date().toISOString();
   return { updated: true };
 }
@@ -213,6 +227,7 @@ export function renderMissionMarkdown(
     sourceRoot = "src/main/java",
     testRoot = "src/test/java",
     env = null,
+    suggestedTestCommand = null,
   } = {},
 ) {
   const pkgPath = (item.packageName ?? "").replaceAll(".", "/");
@@ -259,6 +274,16 @@ export function renderMissionMarkdown(
     `- Evita tests frágiles: no asserts sobre logs ni detalles internos innecesarios.`,
   ].join("\n");
 
+  const commandSection = suggestedTestCommand
+    ? [
+        `## Sugerencia de comando (test selectivo)`,
+        "```bash",
+        suggestedTestCommand,
+        "```",
+        "",
+      ].join("\n")
+    : "";
+
   return [
     `# Mission: Increase coverage for \`${item.className}\``,
     ``,
@@ -268,6 +293,7 @@ export function renderMissionMarkdown(
     `- **Complexity**: ${item.metrics.complexityTotal}`,
     `- **Current Line Coverage**: ${item.metrics.coveragePct.toFixed(2)}%`,
     ``,
+    commandSection,
     `## Target files`,
     `- **Java source**: \`${javaFile}\``,
     `- **Test file**: \`${testFile}\``,
