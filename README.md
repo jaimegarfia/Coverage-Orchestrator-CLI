@@ -28,7 +28,6 @@ Está pensado para equipos que trabajan con **microservicios Java** (Maven o Gra
 - [Limitaciones](#limitaciones)
 - [Roadmap](#roadmap)
 - [Contribuir](#contribuir)
-- [Publicar una nueva versión](#publicar-una-nueva-versión)
 - [Licencia](#licencia)
 
 ---
@@ -371,33 +370,7 @@ Recomendado:
 
 ---
 
-## Publicar una nueva versión
-
-1) Elige un bump SemVer:
-```bash
-npm version patch
-# o: npm version minor
-# o: npm version major
-```
-
-2) Push de commit y tags:
-```bash
-git push --follow-tags
-```
-
-3) Publica:
-```bash
-npm publish --access public
-```
-
-4) Valida:
-```bash
-npx coverage-orchestrator-cli --help
-npx coverage-orchestrator-cli analyze --help
-```
-
----
-
 ## Licencia
 
 ISC
+
