@@ -19,9 +19,49 @@ const program = new Command();
 program
   .name("coverage-orchestrator")
   .description(
-    "Coverage Orchestrator CLI - Prioritiza clases Java para aumentar cobertura con JaCoCo",
+    [
+      "Coverage Orchestrator CLI",
+      "",
+      "Convierte un reporte JaCoCo XML (jacoco.xml) en un backlog priorizado de 'misiones' en Markdown",
+      "para aumentar cobertura de tests unitarios en microservicios Java.",
+      "",
+      "Flujo recomendado:",
+      "  1) Genera jacoco.xml (Maven: mvn test jacoco:report | Gradle: ./gradlew test jacocoTestReport)",
+      "  2) coverage-orchestrator analyze --path <ruta_al_xml>   (o sin --path si se auto-detecta)",
+      "  3) coverage-orchestrator next                           (imprime una misión en Markdown)",
+      "  4) Implementa tests -> vuelve a generar jacoco.xml -> repite",
+      "",
+      "Conceptos:",
+      "  - PriorityScore = MissedLines * Complexity (ROI por clase)",
+      "  - Auto-DONE: si coveragePct >= 60% la clase se marca DONE automáticamente al analizar",
+      "  - Cache por microservicio: se guarda en <projectRoot>/.coverage-cache.json",
+      "",
+      "Ejemplos rápidos:",
+      "  coverage-orchestrator analyze --path target/site/jacoco/jacoco.xml",
+      "  coverage-orchestrator next",
+      "  coverage-orchestrator summary",
+      "",
+      "Ayuda por comando:",
+      "  coverage-orchestrator analyze --help",
+      "  coverage-orchestrator next --help",
+      "  coverage-orchestrator summary --help",
+    ].join("\n"),
   )
-  .version("1.0.0");
+  .version("1.2.0")
+  .addHelpText(
+    "after",
+    [
+      "",
+      "Notas:",
+      "  - Por defecto se ignoran clases con cobertura de líneas > 90% (configurable con --minCoverageToIgnore).",
+      "  - No se ignora ninguna clase por nombre salvo que uses --ignore explícitamente.",
+      "  - 'mark-done' existe por compatibilidad, pero el flujo recomendado es: tests -> analyze -> next.",
+      "",
+      "Repositorio:",
+      "  https://github.com/jaimegarfia/Coverage-Orchestrator-CLI",
+      "",
+    ].join("\n"),
+  );
 
 program
   .command("analyze")

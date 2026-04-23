@@ -1,49 +1,107 @@
 # Coverage Orchestrator CLI
-CLI en Node.js para **orquestar la subida de cobertura** en microservicios Java a partir de un reporte **JaCoCo XML**. Analiza el reporte, calcula un **ROI de cobertura** por clase y genera “misiones” en Markdown para que un agente de IA cree tests unitarios de alto impacto.
+
+**Coverage Orchestrator CLI** is a Node.js CLI that turns a JaCoCo XML report into a prioritized, AI-friendly backlog of “missions” to increase Java unit test coverage efficiently.
+
+It is designed for teams working with **Java microservices** (Maven or Gradle) who want to:
+- identify where coverage improvements have the highest ROI,
+- generate clear, repeatable instructions for an AI agent (or a developer),
+- iterate quickly until reaching a target (e.g. **60% global coverage**).
 
 ---
 
-## Requisitos
+## Table of contents
 
-- Node.js 18+ (recomendado 20+)
-- Proyecto Java que genere `jacoco.xml` (Maven o Gradle)
+- [Key concepts](#key-concepts)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Quickstart](#quickstart)
+- [How it works](#how-it-works)
+- [CLI reference](#cli-reference)
+  - [`analyze`](#analyze)
+  - [`next`](#next)
+  - [`mark-done` (legacy)](#mark-done-legacy)
+  - [`summary`](#summary)
+- [Cache and state model](#cache-and-state-model)
+- [Recommended workflow](#recommended-workflow)
+- [Tips for using it with an AI agent](#tips-for-using-it-with-an-ai-agent)
+- [Troubleshooting](#troubleshooting)
+- [Limitations](#limitations)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [Publishing a new version](#publishing-a-new-version)
+- [License](#license)
 
 ---
 
-## Instalación / Distribución
+## Key concepts
 
-### Opción A (recomendada): usarlo sin instalar (npx)
-Cuando publiques el paquete en npm, cualquier usuario podrá ejecutar:
+### Mission
+A **mission** is a Markdown document printed by `next` that includes:
+- target Java source file path (best-effort),
+- recommended test file path (best-effort),
+- methods with **0% line coverage** (as reported by JaCoCo),
+- a tailored prompt to generate tests (Mockito + detected assertion style).
+
+### PriorityScore (ROI)
+For each class, the CLI computes:
+
+- `MissedLines` = JaCoCo counter `LINE.missed`
+- `Complexity` = JaCoCo counter `COMPLEXITY.missed + COMPLEXITY.covered`
+- `PriorityScore = MissedLines * Complexity`
+
+Higher score means: “fixing this class is likely to move coverage more”.
+
+### Auto-DONE (Smart Analyze)
+On each `analyze` run, classes are automatically labeled based on evidence from the XML:
+
+- if `coveragePct >= 60` → `status: DONE`, `autoVerified: true`
+- else → `status: TODO`
+
+This enables a loop where you simply regenerate the JaCoCo report and rerun `analyze` to advance.
+
+---
+
+## Requirements
+
+- Node.js **18+** (recommended **20+**)
+- A Java project that produces **JaCoCo XML**
+  - Maven: typically `target/site/jacoco/jacoco.xml`
+  - Gradle: typically `build/reports/jacoco/test/jacocoTestReport.xml`
+
+---
+
+## Installation
+
+### Option A (recommended): run via `npx` (no global install)
 
 ```bash
-npx coverage-orchestrator analyze --path <ruta_al_jacoco.xml>
-npx coverage-orchestrator next
-# (Opcional) mark-done existe por compatibilidad, pero el flujo recomendado ya no lo necesita:
-npx coverage-orchestrator mark-done <className>
+npx coverage-orchestrator-cli --help
 ```
 
-### Opción B: instalación global
+> Note: the npm package name is `coverage-orchestrator-cli` and it exposes the binary `coverage-orchestrator`.
+
+### Option B: global install
 
 ```bash
 npm install -g coverage-orchestrator-cli
 coverage-orchestrator --help
 ```
 
-### Opción C: desarrollo local (este repo)
+### Option C: local development (this repository)
 
 ```bash
 npm install
 node src/index.js --help
 ```
 
-Para simular instalación del binario desde el repo:
+To simulate a global binary from this repo:
 
 ```bash
 npm link
 coverage-orchestrator --help
 ```
 
-Para desinstalar el link:
+To remove the link:
 
 ```bash
 npm unlink -g coverage-orchestrator-cli
@@ -51,155 +109,295 @@ npm unlink -g coverage-orchestrator-cli
 
 ---
 
-## Dónde encontrar el `jacoco.xml`
+## Quickstart
 
-### Maven (lo más común)
-Tras ejecutar tests + report:
+### 1) Generate JaCoCo report in your Java project
+
+Maven:
 
 ```bash
 mvn test jacoco:report
 ```
 
-Suele quedar en:
+Gradle:
 
-- `target/site/jacoco/jacoco.xml`
+```bash
+./gradlew test jacocoTestReport
+```
 
-### Gradle
-Normalmente:
+### 2) Analyze the report
 
-- `build/reports/jacoco/test/jacocoTestReport.xml`
-
----
-
-## Uso
-
-### 1) Analizar el reporte y generar cache
-
-El CLI **auto-detecta** el `jacoco.xml` en rutas comunes (Maven/Gradle):
+If you run it from your microservice root, it can auto-detect common paths:
 
 ```bash
 coverage-orchestrator analyze
 ```
 
-Si no lo encuentra automáticamente, especifica la ruta:
+Or pass the path explicitly:
 
 ```bash
 coverage-orchestrator analyze --path "C:\\path\\to\\jacoco.xml"
 ```
 
-Esto genera un fichero local **en el root del microservicio** (projectRoot detectado por `pom.xml`/`build.gradle`):
-
-- `<projectRoot>/.coverage-cache.json`
-
-Opciones:
-
-- `--path <ruta>`: ruta al jacoco.xml (opcional, auto-detecta si no se especifica)
-- `--minCoverageToIgnore <pct>`: ignora clases con cobertura de líneas > pct (default 90)
-- `--ignore <pattern...>`: ignora clases cuyo nombre contenga alguno de esos substrings (opcional; por defecto no se ignora por nombre)
-- `--include <pattern...>`: fuerza incluir clases aunque coincidan con reglas de ignore
-
-Ejemplo:
-
-```bash
-coverage-orchestrator analyze --minCoverageToIgnore 95
-```
-
-### 2) Pedir la siguiente misión
+### 3) Ask for the next mission
 
 ```bash
 coverage-orchestrator next
 ```
 
-`next` devuelve una misión en Markdown con:
+### 4) Implement tests and repeat
 
-- Ruta sugerida del Java a testear
-- Ruta sugerida del test (o dónde crearlo)
-- Lista de métodos con 0% cobertura (según JaCoCo)
-- Prompt sugerido para que un agente de IA genere los tests
+Regenerate JaCoCo XML → rerun `analyze` → run `next` again.
 
-Opciones:
+---
 
-- `--sourceRoot <path>` (default: `src/main/java`)
-- `--testRoot <path>` (default: `src/test/java`)
+## How it works
 
-### 3) (Opcional) Marcar una clase como completada
+### 1) Detect the microservice root (projectRoot)
+Given a `jacoco.xml` path, the CLI walks up directories until it finds:
+- `pom.xml`, or
+- `build.gradle` / `build.gradle.kts`
 
-> El workflow recomendado ya no requiere `mark-done`.
-> El CLI marca automáticamente como `DONE` las clases que alcancen el umbral de cobertura al re-ejecutar `analyze`.
+That directory becomes the **projectRoot**.
+
+### 2) Detect the environment (best-effort)
+From the projectRoot, the CLI detects:
+- build tool: Maven / Gradle
+- Java version (if detectable)
+- Spring Boot version (if detectable)
+- assertion library:
+  - AssertJ / Hamcrest / default JUnit 5 Assertions
+- Lombok usage (`usesLombok` boolean)
+
+### 3) Parse JaCoCo XML
+The parser normalizes the XML into packages/classes/methods and counters.
+
+> The CLI is designed to be **faithful to the report**: it processes all classes present in the XML.
+> Filtering is only applied in the orchestrator layer (e.g. `--minCoverageToIgnore`, `--ignore`), not in the parser.
+
+### 4) Score classes and build missions
+The orchestrator:
+- computes `PriorityScore`,
+- optionally ignores very high coverage classes (default `> 90%`, configurable),
+- auto-labels DONE/TODO using the **60% threshold**,
+- sorts by priority and stores state in a cache file.
+
+---
+
+## CLI reference
+
+The package exposes the binary:
+
+```bash
+coverage-orchestrator <command> [options]
+```
+
+### `analyze`
+
+Scans JaCoCo XML and stores a local state cache.
+
+```bash
+coverage-orchestrator analyze [--path <jacoco.xml>]
+```
+
+Options:
+- `--path <path>`: JaCoCo XML path (optional; will auto-detect common paths if omitted)
+- `--minCoverageToIgnore <pct>`: ignore classes with line coverage `> pct` (default `90`)
+- `--ignore <pattern...>`: ignore classes whose FQCN contains any substring in the list (opt-in)
+- `--include <pattern...>`: force-include classes even if ignored by other rules (opt-in)
+
+Outputs:
+- prints where the cache was saved,
+- prints TODO/DONE counts.
+
+### `next`
+
+Prints the next mission in **Markdown**.
+
+```bash
+coverage-orchestrator next
+```
+
+Options:
+- `--sourceRoot <path>` (default `src/main/java`)
+- `--testRoot <path>` (default `src/test/java`)
+
+Behavior:
+- chooses the highest-priority class with `status !== DONE`.
+
+### `mark-done` (legacy)
+
+Marks a class as DONE manually. Kept for backwards compatibility, but the recommended workflow is:
+
+> write tests → generate JaCoCo → `analyze` → `next`
 
 ```bash
 coverage-orchestrator mark-done com.foo.BarService
 ```
 
----
+### `summary`
 
-## Funcionamiento del CLI (end-to-end)
+Shows a global coverage summary computed from the cache.
 
-### Objetivo
-Subir la cobertura de un microservicio Java hasta un objetivo (p.ej. **60% global**) generando una cola de trabajo (“misiones”) priorizada por ROI de cobertura.
-
-### Flujo recomendado
-1) Ejecuta tests + genera reporte JaCoCo (`jacoco.xml`) en el microservicio.
-2) Ejecuta `coverage-orchestrator analyze` para convertir el XML en un estado local.
-3) Ejecuta `coverage-orchestrator next` para obtener la siguiente misión en Markdown.
-4) Implementa tests, vuelve a generar el reporte JaCoCo y repite.
-
-### Qué hace `analyze`
-1) Localiza el **projectRoot** del microservicio subiendo carpetas desde el `jacoco.xml` hasta encontrar `pom.xml` o `build.gradle(.kts)`.
-2) Detecta el **entorno** del repo (best-effort): Maven/Gradle, versión Java (si se puede), Spring Boot (si se puede), librería de aserciones (AssertJ/Hamcrest/JUnit) y si usa Lombok.
-3) **Parsea** el `jacoco.xml` y obtiene todas las clases del reporte.
-4) Por clase, calcula métricas y ROI:
-   - `MissedLines` = `LINE.missed`
-   - `Complexity` = `COMPLEXITY.missed + COMPLEXITY.covered`
-   - `PriorityScore = MissedLines * Complexity`
-5) Aplica filtros (solo si el usuario lo pide o por coverage):
-   - Por defecto ignora clases con `coveragePct > 90` (configurable con `--minCoverageToIgnore`).
-   - Por defecto **no** ignora clases por nombre. Si quieres filtrar, usa `--ignore` explícitamente.
-6) Ordena por `PriorityScore` y guarda el estado en:
-   - `<projectRoot>/.coverage-cache.json`
-
-### Auto-DONE (Smart Analyze)
-Durante `analyze`, el CLI marca automáticamente una clase como `DONE` si su `coveragePct >= 60` (umbral actual).
-En ese caso añade:
-- `autoVerified: true`
-
-Esto elimina la necesidad del workflow manual de `mark-done` (se mantiene como compatibilidad).
+```bash
+coverage-orchestrator summary
+coverage-orchestrator summary --json
+```
 
 ---
 
-## Limitaciones conocidas
+## Cache and state model
 
-- La ruta sugerida del test depende de `sourcefilename` del XML y puede necesitar ajustes.
-- JaCoCo puede listar métodos sintéticos (por ejemplo `lambda$...`) en la lista de 0% (ya filtramos `$`, `<init>`, `<clinit>`, pero puede haber otros casos).
-- Proyectos multi-módulo o versiones definidas por herencia/variables pueden hacer que `env.version` / `env.frameworkVersion` quede como `null` (best-effort).
+### Where the cache is stored
+The cache is stored inside your microservice **projectRoot**:
+
+- `<projectRoot>/.coverage-cache.json`
+
+This makes the state **per microservice**, avoiding confusion when running the CLI from other directories.
+
+### Cache shape (simplified)
+
+```jsonc
+{
+  "version": 1,
+  "generatedAt": "2026-04-23T00:00:00.000Z",
+  "xmlPath": "C:\\path\\to\\jacoco.xml",
+  "env": {
+    "language": "Java",
+    "buildTool": "Maven",
+    "version": "17",
+    "framework": "Spring Boot",
+    "frameworkVersion": "3.2.0",
+    "assertionLib": "AssertJ",
+    "usesLombok": true
+  },
+  "items": [
+    {
+      "className": "com.acme.FooService",
+      "metrics": { "coveragePct": 12.3, "missedLines": 100, "coveredLines": 14, "complexityTotal": 20 },
+      "priorityScore": 2000,
+      "status": "TODO",
+      "autoVerified": false
+    }
+  ]
+}
+```
 
 ---
 
-## Workflow recomendado (sin mark-done)
+## Recommended workflow
 
-1) Genera/actualiza cobertura en el proyecto:
-   - Maven: `mvn test jacoco:report`
-   - Gradle: `./gradlew test jacocoTestReport`
-2) Ejecuta:
-   ```bash
-   coverage-orchestrator analyze --path <ruta_al_jacoco.xml>
-   ```
-3) Pide la siguiente misión:
-   ```bash
-   coverage-orchestrator next
-   ```
-4) Implementa los tests, vuelve a ejecutar Maven/Gradle, y repite.
+1) Generate coverage:
+- Maven: `mvn test jacoco:report`
+- Gradle: `./gradlew test jacocoTestReport`
+
+2) Analyze:
+```bash
+coverage-orchestrator analyze --path <path-to-jacoco.xml>
+```
+
+3) Pick next mission:
+```bash
+coverage-orchestrator next
+```
+
+4) Implement tests (run them locally), regenerate report, and loop.
+
+---
+
+## Tips for using it with an AI agent
+
+- Keep the mission as the “contract”: it defines the target class, methods with 0% coverage, and the test location.
+- The prompt already assumes:
+  - JUnit 5
+  - Mockito for dependencies
+  - your assertion style (`AssertJ` / `Hamcrest` / `JUnit 5 Assertions`)
+- If the class uses Lombok (`env.usesLombok: true`), consider asking the agent to:
+  - avoid testing Lombok-generated boilerplate unless needed,
+  - focus on behavioral logic and public API.
+
+---
+
+## Troubleshooting
+
+### `analyze` cannot find `jacoco.xml`
+If you do not pass `--path`, the CLI only checks common defaults:
+- `target/site/jacoco/jacoco.xml` (Maven)
+- `build/reports/jacoco/test/jacocoTestReport.xml` (Gradle)
+
+Provide the path manually:
+
+```bash
+coverage-orchestrator analyze --path "<absolute-or-relative-path>"
+```
+
+### Cache not found when running `next`
+The cache is stored in `<projectRoot>/.coverage-cache.json`.
+
+Recommended:
+- run `next` from the microservice root, or
+- run `analyze` first (it prints the cache path).
+
+---
+
+## Limitations
+
+- Source/test file paths are **best-effort**: JaCoCo provides `package` + `sourcefilename`, but monorepos/multi-module layouts may require adjusting `--sourceRoot` / `--testRoot`.
+- Environment detection is heuristic:
+  - multi-module Maven parent inheritance and placeholder properties may result in `env.version` / `env.frameworkVersion` being `null`.
+- Method list for “0% coverage” may include synthetic methods in some edge cases. We currently filter `$`, `<init>`, and `<clinit>`.
 
 ---
 
 ## Roadmap
 
-- Mejorar resolución de `java.version` y `spring-boot` en proyectos multi-módulo (herencia/propiedades).
-- Detectar JUnit4 vs JUnit5 (prompt adaptativo).
-- Enriquecer el “prompt” con dependencias reales (parseando imports / constructor injection).
-- Añadir `summary` al README (tabla + `--json`).
+- Improve Java/Spring detection for multi-module projects (resolve parent chain / properties).
+- Detect JUnit 4 vs JUnit 5 and adapt mission prompts.
+- Enrich missions with dependency hints (by analyzing constructor injection/imports).
+- Document `summary` output more thoroughly and add more actionable reporting.
 
+---
 
-## Licencia
+## Contributing
+
+1) Fork the repo
+2) Create a feature branch
+3) Run:
+   ```bash
+   npm install
+   node src/index.js --help
+   ```
+4) Open a PR with a clear description + before/after examples
+
+---
+
+## Publishing a new version
+
+1) Choose a SemVer bump:
+```bash
+npm version patch
+# or: npm version minor
+# or: npm version major
+```
+
+2) Push commit and tags:
+```bash
+git push --follow-tags
+```
+
+3) Publish:
+```bash
+npm publish --access public
+```
+
+4) Validate:
+```bash
+npx coverage-orchestrator-cli --help
+npx coverage-orchestrator-cli analyze --help
+```
+
+---
+
+## License
 
 ISC
