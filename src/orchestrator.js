@@ -118,7 +118,16 @@ export function buildCacheItems(
   const items = [];
   for (const clazz of classes) {
     const line = clazz.counters?.LINE ?? { missed: 0, covered: 0 };
+    const instr = clazz.counters?.INSTRUCTION ?? { missed: 0, covered: 0 };
     const complexity = clazz.counters?.COMPLEXITY ?? { missed: 0, covered: 0 };
+
+    // Filtro adicional de clases vacías:
+    // - Aunque el parser ya filtra INSTRUCTION total = 0, el cache existente puede contener items viejos.
+    // - Evita inflar los totales de líneas con clases sin instrucciones (discrepancia con el HTML).
+    const missedInstructions = instr.missed ?? 0;
+    const coveredInstructions = instr.covered ?? 0;
+    const totalInstr = missedInstructions + coveredInstructions;
+    if (totalInstr === 0) continue;
 
     const missedLines = line.missed ?? 0;
     const coveredLines = line.covered ?? 0;
@@ -167,6 +176,9 @@ export function buildCacheItems(
         missedLines,
         coveredLines,
         coveragePct,
+        missedInstructions,
+        coveredInstructions,
+        instructionCoveragePct: totalInstr > 0 ? (coveredInstructions / totalInstr) * 100 : 100,
         complexityTotal,
       },
 

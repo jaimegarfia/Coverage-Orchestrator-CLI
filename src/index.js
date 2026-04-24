@@ -404,18 +404,26 @@ program
     // 1) Agregados globales (sumando todas las clases del cache)
     let totalMissed = 0;
     let totalCovered = 0;
+    let totalMissedInstr = 0;
+    let totalCoveredInstr = 0;
 
     for (const it of items) {
       totalMissed += it.metrics?.missedLines ?? 0;
       totalCovered += it.metrics?.coveredLines ?? 0;
+      totalMissedInstr += it.metrics?.missedInstructions ?? 0;
+      totalCoveredInstr += it.metrics?.coveredInstructions ?? 0;
     }
 
     const totalLines = totalMissed + totalCovered;
-    const globalCoveragePct = totalLines > 0 ? (totalCovered / totalLines) * 100 : 0;
+    const globalLineCoveragePct = totalLines > 0 ? (totalCovered / totalLines) * 100 : 0;
 
-    // Gap respecto a target 60%
+    const totalInstr = totalMissedInstr + totalCoveredInstr;
+    const globalInstructionCoveragePct =
+      totalInstr > 0 ? (totalCoveredInstr / totalInstr) * 100 : 0;
+
+    // Gap respecto a target 60% (objetivo basado en LINE coverage)
     const targetPct = 60;
-    const gapPct = targetPct - globalCoveragePct;
+    const gapPct = targetPct - globalLineCoveragePct;
 
     // 2) Top 5 por priorityScore
     const sortedByPriority = [...items].sort(
@@ -431,7 +439,8 @@ program
         missedLines: totalMissed,
         coveredLines: totalCovered,
         totalLines,
-        coveragePct: Number(globalCoveragePct.toFixed(2)),
+        lineCoveragePct: Number(globalLineCoveragePct.toFixed(2)),
+        instructionCoveragePct: Number(globalInstructionCoveragePct.toFixed(2)),
         targetPct,
         gapPct: Number(gapPct.toFixed(2)),
       },
@@ -469,10 +478,10 @@ program
     console.log(
       `Líneas totales: ${totalLines}  |  Covered: ${totalCovered}  |  Missed: ${totalMissed}`,
     );
+    console.log(`Line Coverage: ${globalLineCoveragePct.toFixed(2)}%`);
+    console.log(`Instruction Coverage: ${globalInstructionCoveragePct.toFixed(2)}%`);
     console.log(
-      `Coverage actual: ${globalCoveragePct.toFixed(
-        2,
-      )}%  |  Target: ${targetPct}%  |  Gap: ${gapPct.toFixed(2)}%`,
+      `Target (Line): ${targetPct}%  |  Gap (Line): ${gapPct.toFixed(2)}%`,
     );
     console.log("");
 
